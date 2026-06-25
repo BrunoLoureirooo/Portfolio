@@ -1,0 +1,96 @@
+---
+// Stack — grouped by domain. Established groups render green pills; the
+// learning/ group is amber-marked (the ONE place --learning appears) and
+// sits openly beside the rest, not hidden or apologized for.
+import Section from './Section.astro';
+
+// Data-driven: edit these arrays, the markup follows. Established stack first.
+const groups = [
+  { label: 'languages/', items: ['C#', 'SQL', 'TypeScript'] },
+  { label: 'backend/', items: ['.NET', 'ASP.NET Core', 'Entity Framework'] },
+  { label: 'data/', items: ['PostgreSQL', 'SQL Server', 'Redis'] },
+  { label: 'tooling/', items: ['Docker', 'Git', 'CI / CD', 'Azure'] },
+];
+
+// Kept separate because it gets the amber learning marker.
+const learning = { label: 'learning/', items: ['Java', 'Spring Boot'] };
+---
+
+<Section marker="~/stack" id="stack" title="Stack">
+  <div class="stack">
+    {
+      groups.map((group) => (
+        <div class="group">
+          <p class="group__label">{group.label}</p>
+          <ul class="group__tags">
+            {group.items.map((item) => (
+              <li class="tag">{item}</li>
+            ))}
+          </ul>
+        </div>
+      ))
+    }
+
+    <div class="group group--learning">
+      <p class="group__label">
+        <span class="group__dot" aria-hidden="true"></span>{learning.label}
+      </p>
+      <ul class="group__tags">
+        {learning.items.map((item) => <li class="tag">{item}</li>)}
+      </ul>
+    </div>
+  </div>
+</Section>
+
+<style>
+  .stack {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: var(--space-8);
+  }
+
+  .group__label {
+    font-family: var(--font-mono);
+    font-size: var(--text-sm);
+    color: var(--muted);
+    margin-bottom: var(--space-3);
+  }
+
+  .group__tags {
+    list-style: none;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+  }
+
+  .tag {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    color: var(--accent);
+    background-color: var(--accent-dim);
+    padding: var(--space-1) var(--space-3);
+    border-radius: var(--radius-full);
+    border: 1px solid transparent;
+  }
+
+  /* learning/ group — amber marker, the single sanctioned use of --learning */
+  .group--learning .group__label {
+    color: var(--learning);
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+  }
+
+  .group__dot {
+    width: 0.5em;
+    height: 0.5em;
+    border-radius: var(--radius-full);
+    background-color: var(--learning);
+  }
+
+  .group--learning .tag {
+    color: var(--learning);
+    background-color: var(--learning-dim);
+  }
+</style>

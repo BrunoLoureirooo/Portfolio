@@ -26,7 +26,8 @@ pnpm astro check  # type-check
 
 ## File conventions
 
-See [docs/DESIGN_SYSTEM.md](docs/DESIGN_SYSTEM.md) — tokens, typography, motion rules.
+See [PRODUCT.md](PRODUCT.md) — strategic: register, users, voice, design principles (impeccable reads this).
+See [DESIGN.md](DESIGN.md) — canonical visual system: tokens, typography, motion (impeccable reads this).
 See [docs/CONTENT_ARCH.md](docs/CONTENT_ARCH.md) — content collections schema, i18n routing.
 See [docs/PHASES.md](docs/PHASES.md) — what's stubbed, what's live, next phases.
 

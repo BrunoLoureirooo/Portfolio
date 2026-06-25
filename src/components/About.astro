@@ -1,0 +1,37 @@
+---
+// About — short, declarative bio. Two tight paragraphs; prose is sans for
+// readability (mono is reserved for terminal cues). Placeholder copy — keep
+// it confident and specific when you replace it.
+import Section from './Section.astro';
+---
+
+<Section marker="~/about" id="about" title="About">
+  <div class="about">
+    <p>
+      I'm a software developer focused on backend systems — the services, data
+      models, and integrations that sit behind a product and have to stay
+      correct under load. I care about boundaries that are easy to reason about
+      and code that the next person can change without fear.
+    </p>
+    <p>
+      My core stack is .NET and C#. I'm currently extending into the JVM with
+      Java and Spring Boot, because understanding a second mature ecosystem
+      makes me sharper in the first one.
+    </p>
+  </div>
+</Section>
+
+<style>
+  .about {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+  }
+
+  .about p {
+    max-width: var(--measure);
+    color: var(--text);
+    font-size: var(--text-lg);
+    line-height: var(--leading-normal);
+  }
+</style>

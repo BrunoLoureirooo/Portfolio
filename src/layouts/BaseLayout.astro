@@ -1,0 +1,33 @@
+---
+// BaseLayout — the single shell every page renders inside.
+// The code between the --- fences runs at build time only (never ships to
+// the browser). Styles imported here apply site-wide.
+import '../styles/tokens.css';
+import '../styles/global.css';
+
+interface Props {
+  title: string;
+  description?: string;
+}
+
+const { title, description = 'Software developer portfolio.' } = Astro.props;
+
+// Astro.currentLocale is set by the i18n router based on the URL
+// (/ → "en", /pt/ → "pt"). Falls back to "en" for safety.
+const lang = Astro.currentLocale ?? 'en';
+---
+
+<!doctype html>
+<html lang={lang}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="generator" content={Astro.generator} />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+  </head>
+  <body>
+    <slot />
+  </body>
+</html>

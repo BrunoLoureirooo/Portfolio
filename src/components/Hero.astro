@@ -1,0 +1,123 @@
+---
+// Hero — the 10-second hook. Command-line framing answers "who is this?"
+// literally (whoami → name). Carries the ONE sanctioned motion flourish:
+// a blinking terminal cursor.
+//
+// PHASE 2 TODO: turn the command ("whoami") into a typed-on island
+// (client:idle) that types the command, then reveals the output below.
+// This static markup is that island's fallback — keep it stable so
+// hydration is purely additive.
+---
+
+<section class="hero" aria-label="Introduction">
+  <div class="hero__inner">
+    <p class="hero__cmd">
+      <span class="hero__prompt">bruno@portfolio</span><span class="hero__punc"
+        >:</span
+      ><span class="hero__path">~</span><span class="hero__punc">$</span>{" "}<span
+        class="hero__cmd-text">whoami</span><span
+        class="hero__cursor"
+        aria-hidden="true"></span>
+    </p>
+
+    <h1 class="hero__name">Bruno Loureiro</h1>
+    <p class="hero__role">Software Developer · .NET backend</p>
+
+    <p class="hero__intro">
+      I build reliable backend systems in .NET — the APIs, data, and quiet
+      infrastructure that have to work. Currently extending into the JVM with
+      Java and Spring Boot.
+    </p>
+  </div>
+</section>
+
+<style>
+  .hero {
+    min-height: 72vh;
+    display: flex;
+    align-items: center;
+    padding-block: var(--space-24) var(--space-16);
+  }
+
+  .hero__inner {
+    max-width: var(--container);
+    margin-inline: auto;
+    padding-inline: var(--space-6);
+    width: 100%;
+  }
+
+  /* Command line — mono, the terminal flavor */
+  .hero__cmd {
+    font-family: var(--font-mono);
+    font-size: var(--text-sm);
+    color: var(--text);
+    margin-bottom: var(--space-6);
+  }
+
+  .hero__prompt {
+    color: var(--accent);
+  }
+
+  .hero__punc {
+    color: var(--muted);
+  }
+
+  .hero__path {
+    color: var(--text);
+  }
+
+  .hero__cmd-text {
+    color: var(--text);
+  }
+
+  /* Block cursor — hard on/off blink, true terminal idiom */
+  .hero__cursor {
+    display: inline-block;
+    width: 0.55em;
+    height: 1.05em;
+    margin-left: 0.1em;
+    background-color: var(--accent);
+    vertical-align: text-bottom;
+    animation: cursor-blink 1.06s steps(1) infinite;
+  }
+
+  @keyframes cursor-blink {
+    0%,
+    49% {
+      opacity: 1;
+    }
+    50%,
+    100% {
+      opacity: 0;
+    }
+  }
+
+  /* Name — the display heading, sans, confident */
+  .hero__name {
+    font-size: var(--text-hero);
+    font-weight: var(--weight-bold);
+    margin-bottom: var(--space-2);
+  }
+
+  .hero__role {
+    font-family: var(--font-mono);
+    font-size: var(--text-lg);
+    color: var(--accent);
+    margin-bottom: var(--space-6);
+  }
+
+  .hero__intro {
+    font-size: var(--text-lg);
+    color: var(--muted);
+    max-width: 52ch;
+    line-height: var(--leading-normal);
+  }
+
+  /* Reduced motion: cursor solid and still, no blink */
+  @media (prefers-reduced-motion: reduce) {
+    .hero__cursor {
+      animation: none;
+      opacity: 1;
+    }
+  }
+</style>
