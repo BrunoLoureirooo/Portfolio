@@ -6,6 +6,10 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 Personal developer portfolio. Static Astro site hosted on Cloudflare Pages. Learning project — make unitary edits with explanations, not batch changes.
 
+## Working style (NON-NEGOTIABLE)
+
+This is a learning project. **Always make small, single-purpose edits, each immediately followed by a plain explanation of what it does and why.** Never write or rewrite a whole file in one shot when it can be built up incrementally. One concept per edit. The user is reading to understand every change — pace accordingly. If a change feels large, split it.
+
 ## Commands
 
 ```bash
@@ -48,12 +52,14 @@ Content collections: `experience` and `extras` — adding an entry = drop a `.md
 
 ## Design rules
 
-- Monospace: prompts, section markers, labels, tags, hero CLI
-- Sans-serif: body text inside cards and prose
-- One accent: `--accent: #5dcaa5`
-- `--learning: #e3b341` — amber, ONLY for "currently learning" marker
-- Motion: typing/cursor hero animation only. `prefers-reduced-motion` → cursor still, no type-on.
-- No CRT, no scanlines, no boot sequences.
+- **Single font everywhere**: JetBrains Mono (400/500/700). No sans/mono split.
+- Green is the hero — `--green: #00ff00` (prompts, headings, key accents).
+- Amber is the ONE sparing accent — `--accent: #ffb000` (`:~$` marks, tags, CV button, section command prompts). No third hue.
+- Body text `--fg: #b9f3c0`; green glow (`--glow-green`) on bright-green headings/prompts only, never body.
+- GitHub heatmap uses GitHub's own green ramp (`--heat-0` … `--heat-4`).
+- Whole page = one terminal window (title bar + traffic dots + live clock, sticky nav).
+- Motion: live clock, typewriter hero tagline (~42ms/char), timer-tween nav scroll (NOT `scrollTo` alone), CRT atmosphere. All honored under `prefers-reduced-motion` (no type-on, static caret, no CRT animation).
+- **CRT mode ON by default** — scanlines, vignette, drifting scan band, subtle flicker. Tasteful, not nausea. No fake boot sequence / "press any key".
 
 ## Agent / skill rules
 

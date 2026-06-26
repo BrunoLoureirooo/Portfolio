@@ -1,123 +1,322 @@
 ---
-// Hero — the 10-second hook. Command-line framing answers "who is this?"
-// literally (whoami → name). Carries the ONE sanctioned motion flourish:
-// a blinking terminal cursor.
+// Hero — the 10-second hook. Terminal-framed identity: prompt line, big
+// glowing green name, an amber typewriter tagline, a neofetch panel, and
+// quick links. See docs/features/hero.md for the full spec.
 //
-// PHASE 2 TODO: turn the command ("whoami") into a typed-on island
-// (client:idle) that types the command, then reveals the output below.
-// This static markup is that island's fallback — keep it stable so
-// hydration is purely additive.
+// Motion (per /design-motion-principles, Jakub-weighted): a subtle
+// materialize entrance, a typed-on tagline, and one blinking caret. All
+// reduced-motion paths live in this component's <style>/<script>.
+//
+// PHASE 2 TODO: the neofetch "Langs" line + activity could hydrate from the
+// GitHub API. This static markup stays the fallback — keep it stable.
+
+// Neofetch key/value rows. Hardcoded in Phase 1 (see docs/CONTENT_ARCH.md).
+const info = [
+  { k: 'OS', v: 'Arch Linux x86_64' },
+  { k: 'Role', v: 'Software Developer' },
+  { k: 'Uptime', v: '~3 years coding' },
+  { k: 'Shell', v: 'zsh' },
+  { k: 'Location', v: 'Portugal' },
+  { k: 'Langs', v: 'C#, TypeScript, SQL, Java' },
+];
 ---
 
-<section class="hero" aria-label="Introduction">
+<section class="hero" id="hero" aria-label="Introduction">
   <div class="hero__inner">
+    <p class="hero__lastlogin">Last login: Wed Jun 25 14:08:21 on ttys001</p>
+
     <p class="hero__cmd">
-      <span class="hero__prompt">bruno@portfolio</span><span class="hero__punc"
-        >:</span
-      ><span class="hero__path">~</span><span class="hero__punc">$</span>{" "}<span
-        class="hero__cmd-text">whoami</span><span
-        class="hero__cursor"
-        aria-hidden="true"></span>
+      <span class="hero__user">bruno@portfolio</span><span class="hero__mark"
+        >:~$</span
+      > whoami
     </p>
 
     <h1 class="hero__name">Bruno Loureiro</h1>
-    <p class="hero__role">Software Developer · .NET backend</p>
 
-    <p class="hero__intro">
-      I build reliable backend systems in .NET — the APIs, data, and quiet
-      infrastructure that have to work. Currently extending into the JVM with
-      Java and Spring Boot.
+    <p class="hero__tagline" data-typewriter>
+      <span class="hero__tagline-text">Backend developer · .NET → JVM</span><span
+        class="caret"
+        aria-hidden="true"></span>
     </p>
+
+    <div class="neofetch">
+      <div class="neofetch__logo" aria-hidden="true">BL</div>
+      <dl class="neofetch__info">
+        {
+          info.map((row) => (
+            <div class="neofetch__row">
+              <dt>{row.k}</dt>
+              <dd>{row.v}</dd>
+            </div>
+          ))
+        }
+        <div class="neofetch__row neofetch__row--status">
+          <dt>Status</dt>
+          <dd>
+            <span class="neofetch__dot" aria-hidden="true"></span>available for
+            hire
+          </dd>
+        </div>
+      </dl>
+    </div>
+
+    <ul class="hero__links">
+      <li>
+        <a class="pill" href="https://github.com/BrunoLoureirooo" rel="me">
+          ~/github
+        </a>
+      </li>
+      <li>
+        <a class="pill" href="mailto:bloureiro2004@gmail.com">↳ email</a>
+      </li>
+      <li>
+        <a class="pill pill--amber" href="/cv.pdf" download>resume.pdf ↓</a>
+      </li>
+    </ul>
   </div>
 </section>
 
 <style>
   .hero {
-    min-height: 72vh;
+    min-height: 78vh;
     display: flex;
     align-items: center;
-    padding-block: var(--space-24) var(--space-16);
+    padding-block: var(--space-16) var(--space-12);
   }
 
   .hero__inner {
+    width: 100%;
     max-width: var(--container);
     margin-inline: auto;
     padding-inline: var(--space-6);
-    width: 100%;
   }
 
-  /* Command line — mono, the terminal flavor */
-  .hero__cmd {
-    font-family: var(--font-mono);
+  /* Entrance: subtle materialize, lightly staggered. `backwards` fill holds
+     the from-state during the delay so nothing flashes in at full opacity. */
+  .hero__inner > * {
+    animation: hero-enter 450ms var(--ease-out-quart) backwards;
+    animation-delay: calc(var(--i, 0) * 70ms);
+  }
+  .hero__inner > *:nth-child(1) {
+    --i: 0;
+  }
+  .hero__inner > *:nth-child(2) {
+    --i: 1;
+  }
+  .hero__inner > *:nth-child(3) {
+    --i: 2;
+  }
+  .hero__inner > *:nth-child(4) {
+    --i: 3;
+  }
+  .hero__inner > *:nth-child(5) {
+    --i: 4;
+  }
+  .hero__inner > *:nth-child(6) {
+    --i: 5;
+  }
+
+  @keyframes hero-enter {
+    from {
+      opacity: 0;
+      transform: translateY(8px);
+      filter: blur(4px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+      filter: blur(0);
+    }
+  }
+
+  .hero__lastlogin {
     font-size: var(--text-sm);
-    color: var(--text);
-    margin-bottom: var(--space-6);
+    color: var(--dim);
+    margin-bottom: var(--space-3);
   }
 
-  .hero__prompt {
+  .hero__cmd {
+    font-size: var(--text-sm);
+    color: var(--fg);
+    margin-bottom: var(--space-5);
+  }
+  .hero__user {
+    color: var(--green);
+  }
+  .hero__mark {
     color: var(--accent);
   }
 
-  .hero__punc {
-    color: var(--muted);
+  /* Green is the hero: the name is the one bright-green glowing display line. */
+  .hero__name {
+    font-size: var(--text-hero);
+    font-weight: var(--weight-bold);
+    letter-spacing: var(--tracking-tight);
+    color: var(--green);
+    text-shadow: var(--glow-green);
+    margin-bottom: var(--space-4);
   }
 
-  .hero__path {
-    color: var(--text);
+  .hero__tagline {
+    font-size: var(--text-xl);
+    color: var(--accent);
+    margin-bottom: var(--space-10);
+    /* Reserve line height so the typed text doesn't reflow the layout. */
+    min-height: 1.4em;
   }
 
-  .hero__cmd-text {
-    color: var(--text);
-  }
-
-  /* Block cursor — hard on/off blink, true terminal idiom */
-  .hero__cursor {
+  /* Block caret — terminal idiom. step-end gives a hard on/off blink. */
+  .caret {
     display: inline-block;
-    width: 0.55em;
+    width: 0.6em;
     height: 1.05em;
-    margin-left: 0.1em;
-    background-color: var(--accent);
+    margin-left: 0.08em;
+    background-color: currentColor;
     vertical-align: text-bottom;
-    animation: cursor-blink 1.06s steps(1) infinite;
+    animation: caret-blink 1.06s step-end infinite;
   }
 
-  @keyframes cursor-blink {
+  @keyframes caret-blink {
     0%,
-    49% {
+    50% {
       opacity: 1;
     }
-    50%,
+    50.01%,
     100% {
       opacity: 0;
     }
   }
 
-  /* Name — the display heading, sans, confident */
-  .hero__name {
-    font-size: var(--text-hero);
+  /* ---- Neofetch panel ---- */
+  .neofetch {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-6);
+    max-width: 560px;
+    margin-bottom: var(--space-8);
+    padding: var(--space-5);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    background-color: var(--green-dim);
+  }
+
+  .neofetch__logo {
+    flex: none;
+    display: grid;
+    place-items: center;
+    width: 92px;
+    height: 92px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    font-size: var(--text-2xl);
     font-weight: var(--weight-bold);
-    margin-bottom: var(--space-2);
+    letter-spacing: 0.05em;
+    color: var(--green);
+    text-shadow: var(--glow-green);
   }
 
-  .hero__role {
-    font-family: var(--font-mono);
-    font-size: var(--text-lg);
+  .neofetch__info {
+    flex: 1 1 240px;
+    display: grid;
+    gap: var(--space-1);
+    font-size: var(--text-sm);
+  }
+  .neofetch__row {
+    display: grid;
+    grid-template-columns: 5.5em 1fr;
+    gap: var(--space-3);
+  }
+  .neofetch__row dt {
+    color: var(--green);
+  }
+  .neofetch__row dd {
+    color: var(--fg);
+  }
+  .neofetch__row--status dd {
+    color: var(--status-available);
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+  }
+  .neofetch__dot {
+    width: 0.55em;
+    height: 0.55em;
+    border-radius: var(--radius-full);
+    background-color: var(--status-available);
+  }
+
+  /* ---- Quick links ---- */
+  .hero__links {
+    list-style: none;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-3);
+  }
+
+  .pill {
+    display: inline-block;
+    font-size: var(--text-sm);
+    color: var(--fg);
+    text-decoration: none;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-full);
+    padding: var(--space-2) var(--space-4);
+    transition:
+      color var(--duration-base) var(--ease-out-quart),
+      border-color var(--duration-base) var(--ease-out-quart),
+      box-shadow var(--duration-base) var(--ease-out-quart);
+  }
+  .pill:hover,
+  .pill:focus-visible {
+    color: var(--green);
+    border-color: var(--green);
+    box-shadow: var(--glow-green);
+    text-decoration: none;
+  }
+  /* Amber resume pill: the one amber CTA among the links. */
+  .pill--amber {
     color: var(--accent);
-    margin-bottom: var(--space-6);
+    border-color: var(--accent);
+  }
+  .pill--amber:hover,
+  .pill--amber:focus-visible {
+    color: var(--bg);
+    background-color: var(--accent);
+    border-color: var(--accent);
+    box-shadow: none;
   }
 
-  .hero__intro {
-    font-size: var(--text-lg);
-    color: var(--muted);
-    max-width: 52ch;
-    line-height: var(--leading-normal);
-  }
-
-  /* Reduced motion: cursor solid and still, no blink */
+  /* ---- Reduced motion: no materialize, no blink, caret pinned solid ---- */
   @media (prefers-reduced-motion: reduce) {
-    .hero__cursor {
+    .caret {
       animation: none;
       opacity: 1;
     }
   }
 </style>
+
+<script>
+  // Typewriter for the amber tagline. Progressive enhancement: the full text
+  // is already in the DOM (screen readers + no-JS see it). When motion is
+  // allowed, we clear it and type it back ~42ms/char. Reduced-motion users
+  // keep the instant full text.
+  const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const el = document.querySelector<HTMLElement>(
+    '[data-typewriter] .hero__tagline-text',
+  );
+
+  if (el && !reduce) {
+    const full = el.textContent ?? '';
+    el.textContent = '';
+    let i = 0;
+    const speed = 42; // matches --type-speed
+    const type = () => {
+      i += 1;
+      el.textContent = full.slice(0, i);
+      if (i < full.length) window.setTimeout(type, speed);
+    };
+    type();
+  }
+</script>

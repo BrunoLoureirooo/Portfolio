@@ -1,0 +1,99 @@
+---
+// Experience — `git log` as a vertical timeline, newest-first. Content comes
+// from the `experience` collection (drop a .md file to add a role; see
+// docs/CONTENT_ARCH.md). The newest node glows; older nodes are dim.
+import Section from './Section.astro';
+import { getCollection } from 'astro:content';
+
+const entries = (await getCollection('experience')).sort(
+  (a, b) => b.data.start.getTime() - a.data.start.getTime(),
+);
+
+const year = (d: Date) => d.getUTCFullYear();
+---
+
+<Section id="experience" title="Experience" cmd="git log --author=bruno --all">
+  <ol class="timeline">
+    {
+      entries.map((entry, idx) => (
+        <li class="entry">
+          <span
+            class:list={['entry__node', { 'entry__node--head': idx === 0 }]}
+            aria-hidden="true"
+          />
+          <p class="entry__period">
+            [ {year(entry.data.start)} —{' '}
+            {entry.data.end ? year(entry.data.end) : 'present'} ]
+          </p>
+          <h3 class="entry__role">
+            {entry.data.title} @ {entry.data.company}
+          </h3>
+          <p class="entry__desc">{entry.data.description}</p>
+          <p class="entry__stack">{entry.data.stack.join(' · ')}</p>
+        </li>
+      ))
+    }
+  </ol>
+</Section>
+
+<style>
+  .timeline {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  /* Each entry carries the connecting line as its own left border, so the
+     line is continuous down the list without a separate element. */
+  .entry {
+    position: relative;
+    margin-left: 4px;
+    padding-left: var(--space-6);
+    padding-bottom: var(--space-8);
+    border-left: 1px solid var(--border);
+  }
+  .entry:last-child {
+    padding-bottom: 0;
+  }
+
+  .entry__node {
+    position: absolute;
+    left: -5px;
+    top: 0.3em;
+    width: 9px;
+    height: 9px;
+    border-radius: var(--radius-full);
+    background-color: var(--dim);
+    /* Punch the node out of the background so the line doesn't show through. */
+    box-shadow: 0 0 0 3px var(--bg);
+  }
+  .entry__node--head {
+    background-color: var(--green);
+    box-shadow:
+      0 0 0 3px var(--bg),
+      var(--glow-green);
+  }
+
+  .entry__period {
+    color: var(--accent);
+    font-size: var(--text-xs);
+    margin-bottom: var(--space-1);
+  }
+  .entry__role {
+    color: var(--green);
+    font-weight: var(--weight-bold);
+    font-size: var(--text-lg);
+    margin-bottom: var(--space-2);
+  }
+  .entry__desc {
+    color: var(--fg);
+    font-size: var(--text-sm);
+    line-height: var(--leading-normal);
+    max-width: var(--measure);
+    margin-bottom: var(--space-2);
+  }
+  .entry__stack {
+    color: var(--dim);
+    font-size: var(--text-xs);
+  }
+</style>

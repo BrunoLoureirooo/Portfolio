@@ -2,8 +2,13 @@
 // BaseLayout — the single shell every page renders inside.
 // The code between the --- fences runs at build time only (never ships to
 // the browser). Styles imported here apply site-wide.
+//
+// The whole page is ONE terminal window: a centered frame with a sticky
+// title bar (traffic-light dots + live ticking clock). Sections render
+// inside the <slot />. Nav bar + CRT layer land in later steps.
 import '../styles/tokens.css';
 import '../styles/global.css';
+import Nav from '../components/Nav.astro';
 
 interface Props {
   title: string;
@@ -26,8 +31,247 @@ const lang = Astro.currentLocale ?? 'en';
     <meta name="generator" content={Astro.generator} />
     <title>{title}</title>
     <meta name="description" content={description} />
+
+    <!-- JetBrains Mono — the single font. Preconnect first so the CSS
+         request isn't blocked on DNS/TLS to the font host. -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap"
+    />
   </head>
   <body>
-    <slot />
+    <div class="window">
+      <!-- Sticky chrome: title bar + nav pin to the viewport as one block. -->
+      <div class="chrome">
+        <header class="titlebar">
+          <div class="titlebar__dots" aria-hidden="true">
+            <span class="dot dot--red"></span>
+            <span class="dot dot--yellow"></span>
+            <span class="dot dot--green"></span>
+          </div>
+          <p class="titlebar__title">bruno@portfolio: ~/dev — zsh — 132×40</p>
+          <div class="titlebar__meta">
+            <span class="titlebar__enc">UTF-8</span>
+            <time class="titlebar__clock" id="clock" aria-label="Current time"
+              >--:--:--</time
+            >
+          </div>
+        </header>
+
+        <Nav />
+      </div>
+
+      <slot />
+    </div>
+
+    <!-- CRT atmosphere — purely decorative overlay sitting above everything
+         (pointer-events: none, so it never intercepts clicks). Scanlines +
+         vignette are static; the scan band and flicker animate. All motion
+         is frozen under prefers-reduced-motion. -->
+    <div class="crt" aria-hidden="true">
+      <div class="crt__band"></div>
+    </div>
+
+    <script>
+      // Live clock in the title bar: HH:MM:SS, updated every second.
+      // Vanilla + tiny — no island needed for a single text node.
+      const el = document.getElementById('clock');
+      if (el) {
+        const pad = (n: number) => String(n).padStart(2, '0');
+        const tick = () => {
+          const d = new Date();
+          el.textContent = `${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
+        };
+        tick();
+        setInterval(tick, 1000);
+      }
+    </script>
   </body>
 </html>
+
+<style>
+  /* Page background sits behind the window: near-black with a faint green
+     radial glow bleeding down from the top edge (phosphor ambience). */
+  body {
+    background-color: var(--page-bg);
+    background-image: radial-gradient(
+      120% 60% at 50% 0%,
+      var(--green-dim),
+      transparent 60%
+    );
+    background-attachment: fixed;
+  }
+
+  /* The terminal window — centered frame holding the whole site.
+     No overflow clip here: that would trap the sticky title bar inside
+     the window instead of pinning it to the viewport. The title bar
+     carries its own rounded top corners to match the frame. */
+  .window {
+    position: relative;
+    max-width: var(--container);
+    margin: var(--space-8) auto var(--space-16);
+    background-color: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-window);
+    box-shadow: var(--glow-window);
+  }
+
+  /* Sticky chrome block — title bar + nav pin to the viewport together. */
+  .chrome {
+    position: sticky;
+    top: 0;
+    z-index: var(--z-sticky);
+  }
+
+  .titlebar {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: center;
+    gap: var(--space-4);
+    padding: var(--space-3) var(--space-4);
+    background-color: var(--panel);
+    border-bottom: 1px solid var(--border);
+    border-top-left-radius: var(--radius-window);
+    border-top-right-radius: var(--radius-window);
+  }
+
+  /* macOS-style traffic-light dots (decorative, not interactive) */
+  .titlebar__dots {
+    display: flex;
+    gap: var(--space-2);
+  }
+
+  .dot {
+    width: 12px;
+    height: 12px;
+    border-radius: var(--radius-full);
+  }
+
+  .dot--red {
+    background-color: var(--dot-red);
+  }
+  .dot--yellow {
+    background-color: var(--dot-yellow);
+  }
+  .dot--green {
+    background-color: var(--dot-green);
+  }
+
+  .titlebar__title {
+    grid-column: 2;
+    text-align: center;
+    font-size: var(--text-xs);
+    color: var(--muted);
+    white-space: nowrap;
+  }
+
+  .titlebar__meta {
+    justify-self: end;
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    font-size: var(--text-xs);
+    color: var(--muted);
+  }
+
+  /* Tabular numbers so the ticking seconds don't shift width. */
+  .titlebar__clock {
+    color: var(--green);
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* The centered title is the first thing to drop on narrow screens —
+     dots and clock are the load-bearing chrome. */
+  @media (max-width: 640px) {
+    .titlebar__title {
+      display: none;
+    }
+  }
+
+  /* ---- CRT atmosphere ---------------------------------------------------
+     Full-viewport overlay above all content. The subtle flicker rides on
+     the container's opacity; scanlines + vignette live in pseudo-elements. */
+  .crt {
+    position: fixed;
+    inset: 0;
+    z-index: var(--z-crt);
+    pointer-events: none;
+    animation: crt-flicker 4s steps(1) infinite;
+  }
+
+  /* Scanlines — faint dark horizontal rule every ~3px. */
+  .crt::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image: repeating-linear-gradient(
+      to bottom,
+      transparent 0,
+      transparent 2px,
+      rgba(0, 0, 0, 0.16) 3px
+    );
+  }
+
+  /* Vignette — darkens the corners so the screen reads as curved glass. */
+  .crt::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(
+      120% 120% at 50% 50%,
+      transparent 55%,
+      rgba(0, 0, 0, 0.55) 100%
+    );
+  }
+
+  /* Drifting scan band — a soft green sweep travelling slowly down-screen. */
+  .crt__band {
+    position: absolute;
+    left: 0;
+    right: 0;
+    height: 28%;
+    background: linear-gradient(
+      to bottom,
+      transparent,
+      rgba(0, 255, 0, 0.035),
+      transparent
+    );
+    animation: crt-scan 7s linear infinite;
+  }
+
+  @keyframes crt-scan {
+    from {
+      transform: translateY(-110%);
+    }
+    to {
+      transform: translateY(460%);
+    }
+  }
+
+  /* Flicker — barely-there brightness wobble. Kept tiny on purpose. */
+  @keyframes crt-flicker {
+    0%,
+    97%,
+    100% {
+      opacity: 1;
+    }
+    98% {
+      opacity: 0.92;
+    }
+    99% {
+      opacity: 0.97;
+    }
+  }
+
+  /* Reduced motion: keep the static scanlines + vignette, kill all movement. */
+  @media (prefers-reduced-motion: reduce) {
+    .crt {
+      animation: none;
+    }
+    .crt__band {
+      display: none;
+    }
+  }
+</style>

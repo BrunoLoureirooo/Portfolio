@@ -24,15 +24,15 @@ Precise and engineered — the site should read like well-crafted code: exact, i
 
 Confident and declarative — copy states facts, never hedges ("Built X to do Y", not "I tried to make a thing that maybe…"). Writing carries as much weight as visuals.
 
-Terminal-flavored, not terminal-gated — monospace accents, prompt-style markers, dark theme as a nod to the craft; but normal scrolling, clickable nav, fully legible to non-technical readers. The aesthetic is a wink, never a barrier.
+Full terminal treatment, not terminal-gated — the page is one terminal window (prompt-led sections, green-on-black phosphor, CRT atmosphere); but it behaves like a normal site: real scroll, clickable sticky nav, fully legible to non-technical readers. It is styling, never a barrier — not a working REPL.
 
 Three words: **precise, declarative, technical.**
 
 ## Anti-references
 
 - **Generic dev-folio.** No gradient hero, no animated skill-percentage bars, no grid of technology logo icons, no cookie-cutter template silhouette. If it looks like a Bootstrap/template starter, it has failed.
-- **Terminal cliché.** No CRT glow, no scanlines, no fake boot sequence, no "press any key" gimmicks. Terminal-flavored ≠ terminal cosplay.
-- **Over-design.** No parallax, no scroll-jacking, no competing animations. Exactly one motion flourish (hero typing/cursor) is allowed; everything else is static.
+- **Terminal cosplay, badly done.** The terminal window + CRT atmosphere IS the brand — embraced fully, but tasteful. No fake boot sequence, no "press any key", no working-REPL pretense, no nausea-inducing CRT. Atmosphere, not gimmick.
+- **Over-design.** No parallax, no scroll-jacking, no competing animations. Motion is purposeful and limited to: live clock, hero typewriter tagline, timer-tween nav scroll, and the CRT layer. Everything else static.
 - **Hedging copy.** No "I'm passionate about…", no "aspiring", no apologetic framing of the learning stack.
 
 ## Design Principles

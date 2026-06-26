@@ -2,56 +2,89 @@
    Design tokens — single source of truth.
    See DESIGN.md for rationale. Components reference these
    variables; they never hardcode raw values.
+
+   Direction: terminal-window, green-on-black phosphor, one
+   amber accent, CRT atmosphere. Supersedes the earlier
+   restrained no-CRT palette + mono/sans split.
    ============================================================ */
 
 :root {
   /* --- Color (committed by brief, non-negotiable) --- */
-  --bg: #0d1117;        /* base background */
-  --surface: #161b22;   /* cards, raised surfaces */
-  --border: #30363d;    /* hairlines, dividers */
-  --text: #e6edf3;      /* body text */
-  --muted: #8b949e;     /* secondary text, captions, labels */
-  --accent: #5dcaa5;    /* terminal green: prompts, links, active, pills */
-  --learning: #e3b341;  /* amber: ONLY the "currently learning" marker */
+  --bg: #0a0a0a;        /* terminal screen */
+  --page-bg: #060806;   /* behind the window (faint green radial glow at top) */
+  --panel: #0d110d;     /* cards, stat boxes */
+  --border: #1b291b;    /* hairline borders */
+  --green: #00ff00;     /* PRIMARY: prompts, headings, key accents (the star) */
+  --fg: #b9f3c0;        /* body text (soft, readable green) */
+  --muted: #5f8f68;     /* secondary text, labels */
+  --dim: #3a6a45;       /* tertiary: timestamps, comments, file perms */
+  --accent: #ffb000;    /* amber: the ONE second color — :~$ marks, tags, CV button, section command prompts */
+  --status-available: #39d353; /* bright green — "● available for hire" line */
 
-  /* Accent at low alpha for tints (pill backgrounds, focus rings) */
-  --accent-dim: rgba(93, 202, 165, 0.12);
-  --accent-ring: rgba(93, 202, 165, 0.5);
+  /* Accent (amber) at low alpha — pill fills, tag chips, focus rings */
+  --accent-dim: rgba(255, 176, 0, 0.12);
+  --accent-ring: rgba(255, 176, 0, 0.5);
 
-  /* Amber at low alpha — paired with --learning, used ONLY on the
-     "currently learning" group marker in Stack. Nowhere else. */
+  /* Green at low alpha — chip fills, neofetch panel wash */
+  --green-dim: rgba(0, 255, 0, 0.10);
+
+  /* Legacy aliases — existing components still reference --text / --surface.
+     Point at the new tokens to avoid breakage until they're re-skinned. */
+  --text: var(--fg);
+  --surface: var(--panel);
+
+  /* "Currently learning" amber marker (Stack). NOTE: amber is now the
+     general accent, so this marker needs a distinguishing treatment —
+     reconcile when Stack is reworked. Kept defined to avoid breakage. */
+  --learning: #e3b341;
   --learning-dim: rgba(227, 179, 65, 0.1);
 
-  /* --- Typography: families --- */
-  /* Mono for prompts/markers/labels/tags/hero. Sans for body prose. */
-  --font-mono: ui-monospace, "SF Mono", "JetBrains Mono", Consolas, monospace;
-  --font-sans: system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif;
+  /* GitHub contribution heatmap ramp (GitHub's own greens, by intensity) */
+  --heat-0: #0d1f14;    /* empty */
+  --heat-1: #0e4429;
+  --heat-2: #006d32;
+  --heat-3: #26a641;
+  --heat-4: #39d353;    /* busiest */
 
-  /* --- Typography: scale (modular ~1.25) --- */
-  --text-xs: 0.75rem;    /* 12px — captions, tags */
-  --text-sm: 0.875rem;   /* 14px — secondary */
-  --text-base: 1rem;     /* 16px — body */
-  --text-lg: 1.125rem;   /* 18px — lead */
-  --text-xl: 1.5rem;     /* 24px — subheads */
-  --text-2xl: 2rem;      /* 32px — section titles */
-  /* Hero display: fluid, capped at 4rem (well under the 6rem ceiling) */
-  --text-hero: clamp(2.25rem, 6vw, 4rem);
+  /* Terminal window traffic-light dots */
+  --dot-red: #ff5f56;
+  --dot-yellow: #ffbd2e;
+  --dot-green: #27c93f;
 
-  /* --- Typography: weights --- */
+  /* Glows — green only, on bright-green headings & prompts, NEVER body */
+  --glow-green: 0 0 8px rgba(0, 255, 0, 0.45);
+  --glow-window: 0 0 40px rgba(0, 255, 0, 0.10); /* soft outer glow on the window */
+
+  /* --- Typography: single font everywhere (terminal authenticity) --- */
+  --font-mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
+  /* Alias kept for existing refs; single-font system → same stack. */
+  --font-sans: var(--font-mono);
+
+  /* --- Typography: scale (anchored at 14px body) --- */
+  --text-xs: 0.75rem;     /* 12px — captions, file perms, legend */
+  --text-sm: 0.8125rem;   /* 13px — secondary */
+  --text-base: 0.875rem;  /* 14px — body */
+  --text-lg: 1rem;        /* 16px — lead */
+  --text-xl: 1.375rem;    /* 22px — subheads */
+  --text-2xl: 1.75rem;    /* 28px — section titles */
+  /* Hero name: fluid 34 → 68px, letter-spacing ~1px (see --tracking-tight) */
+  --text-hero: clamp(34px, 7vw, 68px);
+
+  /* --- Typography: weights (JetBrains Mono 400 / 500 / 700) --- */
   --weight-regular: 400;
   --weight-medium: 500;
-  --weight-semibold: 600;
+  --weight-semibold: 600;  /* synthesized if not loaded; avoid relying on it */
   --weight-bold: 700;
 
   /* --- Typography: line heights --- */
   --leading-tight: 1.15;   /* display headings */
   --leading-snug: 1.35;    /* subheads */
-  --leading-normal: 1.6;   /* body prose */
+  --leading-normal: 1.65;  /* body prose */
 
   /* --- Typography: letter spacing --- */
-  --tracking-tight: -0.02em;  /* large headings */
+  --tracking-tight: 0.01em;   /* hero name (~1px) */
   --tracking-normal: 0;
-  --tracking-wide: 0.02em;    /* small mono labels */
+  --tracking-wide: 0.02em;    /* small labels */
 
   /* --- Spacing scale (0.25rem base, varied for rhythm) --- */
   --space-1: 0.25rem;
@@ -63,32 +96,38 @@
   --space-8: 2rem;
   --space-10: 2.5rem;
   --space-12: 3rem;
-  --space-16: 4rem;
-  --space-24: 6rem;   /* between major sections */
+  --space-16: 4rem;     /* ~64px between major sections */
+  --space-24: 6rem;
 
   /* --- Radii --- */
+  --radius-cell: 2px;    /* heatmap cells */
   --radius-sm: 4px;
-  --radius-md: 6px;     /* cards */
+  --radius-md: 6px;      /* cards */
   --radius-lg: 12px;
+  --radius-window: 10px; /* terminal window */
   --radius-full: 9999px; /* pills */
 
   /* --- Layout --- */
-  --measure: 68ch;       /* prose max width (65–75ch target) */
-  --container: 72rem;    /* page max width */
+  --measure: 760px;      /* about prose max width */
+  --container: 1080px;   /* terminal window max width */
 
   /* --- Z-index: semantic scale, no magic numbers --- */
   --z-base: 0;
-  --z-sticky: 100;       /* sticky nav */
+  --z-sticky: 100;       /* sticky title bar + nav */
   --z-dropdown: 200;
   --z-modal: 300;
   --z-toast: 400;
+  --z-crt: 500;          /* CRT overlay — topmost, pointer-events: none */
 
   /* --- Motion: durations --- */
   --duration-fast: 120ms;
-  --duration-base: 200ms;
+  --duration-base: 150ms;    /* snappy transitions */
   --duration-slow: 320ms;
+  --type-speed: 42ms;        /* typewriter, per character */
+  --scroll-duration: 500ms;  /* nav scroll tween (300–700ms range) */
 
-  /* --- Motion: easing (ease-out exponential, no bounce) --- */
+  /* --- Motion: easing --- */
+  --ease-out-cubic: cubic-bezier(0.215, 0.61, 0.355, 1); /* nav scroll tween */
   --ease-out-quart: cubic-bezier(0.25, 1, 0.5, 1);
   --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
 }

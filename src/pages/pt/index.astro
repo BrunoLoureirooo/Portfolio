@@ -1,0 +1,29 @@
+---
+// Portuguese home page (route: "/pt/"). PHASE 1 STUB: this duplicates the EN
+// composition so the i18n route + language toggle are live now. The section
+// components still render English copy.
+//
+// PHASE 2/3 TODO (docs/PHASES.md): real PT translations. The cleanest path is
+// to move section copy into the content collections / a strings map keyed by
+// locale, then read Astro.currentLocale here — not to fork these components.
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Hero from '../../components/Hero.astro';
+import About from '../../components/About.astro';
+import Projects from '../../components/Projects.astro';
+import Experience from '../../components/Experience.astro';
+import Stack from '../../components/Stack.astro';
+import GitHub from '../../components/GitHub.astro';
+import Footer from '../../components/Footer.astro';
+---
+
+<BaseLayout title="Bruno Loureiro — Software Developer">
+  <main>
+    <Hero />
+    <About />
+    <Projects />
+    <Experience />
+    <Stack />
+    <GitHub />
+  </main>
+  <Footer />
+</BaseLayout>

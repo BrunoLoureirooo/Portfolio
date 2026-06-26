@@ -1,0 +1,115 @@
+---
+// Footer — the terminal sign-off. `exit` with a blinking caret, a closed-
+// connection line, social links, and a sign. Mirrors the Hero's prompt idiom
+// to bookend the page.
+---
+
+<footer class="footer">
+  <div class="footer__inner">
+    <p class="footer__exit">
+      <span class="footer__user">bruno@portfolio</span><span class="footer__mark"
+        >:~$</span
+      > exit<span class="caret" aria-hidden="true"></span>
+    </p>
+    <p class="footer__closed">Connection to brunoloureiro.dev closed.</p>
+
+    <div class="footer__bar">
+      <ul class="footer__links">
+        <li><a href="https://github.com/BrunoLoureirooo" rel="me">github</a></li>
+        <li>
+          <a href="https://linkedin.com/in/bruno-loureiro" rel="me">linkedin</a>
+        </li>
+        <li><a href="https://x.com/bruno_loureiro" rel="me">x.com</a></li>
+        <li><a href="mailto:bloureiro2004@gmail.com">email</a></li>
+      </ul>
+      <p class="footer__copy">© 2026 · built in vim, btw</p>
+    </div>
+  </div>
+</footer>
+
+<style>
+  .footer {
+    border-top: 1px solid var(--border);
+  }
+  .footer__inner {
+    max-width: var(--container);
+    margin-inline: auto;
+    padding: var(--space-12) var(--space-6);
+  }
+
+  .footer__exit {
+    font-size: var(--text-sm);
+    margin-bottom: var(--space-2);
+  }
+  .footer__user {
+    color: var(--green);
+  }
+  .footer__mark {
+    color: var(--accent);
+  }
+
+  .caret {
+    display: inline-block;
+    width: 0.55em;
+    height: 1.05em;
+    margin-left: 0.08em;
+    background-color: var(--green);
+    vertical-align: text-bottom;
+    animation: footer-caret-blink 1.06s step-end infinite;
+  }
+  @keyframes footer-caret-blink {
+    0%,
+    50% {
+      opacity: 1;
+    }
+    50.01%,
+    100% {
+      opacity: 0;
+    }
+  }
+
+  .footer__closed {
+    color: var(--dim);
+    font-size: var(--text-sm);
+    margin-bottom: var(--space-8);
+  }
+
+  .footer__bar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-4);
+  }
+  .footer__links {
+    list-style: none;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-4);
+    font-size: var(--text-sm);
+  }
+  .footer__links a {
+    color: var(--muted);
+    text-decoration: none;
+    transition: color var(--duration-base) var(--ease-out-quart);
+  }
+  .footer__links a:hover,
+  .footer__links a:focus-visible {
+    color: var(--green);
+    text-decoration: none;
+  }
+  .footer__copy {
+    color: var(--dim);
+    font-size: var(--text-xs);
+  }
+
+  /* Reduced motion: caret holds solid (the global reduce rule would otherwise
+     freeze it on the invisible keyframe). */
+  @media (prefers-reduced-motion: reduce) {
+    .caret {
+      animation: none;
+      opacity: 1;
+    }
+  }
+</style>

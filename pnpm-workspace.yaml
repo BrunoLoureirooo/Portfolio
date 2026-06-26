@@ -4,3 +4,5 @@ onlyBuiltDependencies:
 allowBuilds:
   esbuild: true
   sharp: true
+minimumReleaseAgeExclude:
+  - preact@10.29.3

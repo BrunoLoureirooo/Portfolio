@@ -1,0 +1,55 @@
+---
+// LangToggle — EN / PT switch. Astro.currentLocale (set by the i18n router
+// from the URL) marks the active locale. The default locale (en) lives at /,
+// pt at /pt/ (astro.config: prefixDefaultLocale: false).
+//
+// PHASE 1: pt is a stub that duplicates the EN page. TODO: real translations
+// (see docs/PHASES.md, docs/CONTENT_ARCH.md).
+const current = Astro.currentLocale ?? 'en';
+
+const locales = [
+  { code: 'en', href: '/' },
+  { code: 'pt', href: '/pt/' },
+];
+---
+
+<div class="langtoggle" role="group" aria-label="Language">
+  {
+    locales.map((l) => (
+      <a
+        class:list={['langtoggle__opt', { 'is-active': l.code === current }]}
+        href={l.href}
+        hreflang={l.code}
+        aria-current={l.code === current ? 'true' : undefined}
+      >
+        {l.code.toUpperCase()}
+      </a>
+    ))
+  }
+</div>
+
+<style>
+  .langtoggle {
+    display: inline-flex;
+    align-items: center;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-full);
+    overflow: hidden;
+  }
+  .langtoggle__opt {
+    font-size: var(--text-xs);
+    color: var(--muted);
+    text-decoration: none;
+    padding: var(--space-1) var(--space-2);
+    transition: color var(--duration-base) var(--ease-out-quart);
+  }
+  .langtoggle__opt:hover,
+  .langtoggle__opt:focus-visible {
+    color: var(--accent);
+    text-decoration: none;
+  }
+  .langtoggle__opt.is-active {
+    color: var(--bg);
+    background-color: var(--accent);
+  }
+</style>

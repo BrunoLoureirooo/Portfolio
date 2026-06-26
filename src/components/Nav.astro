@@ -1,0 +1,163 @@
+---
+// Nav + CV bar — the second row of the sticky chrome, just beneath the
+// title bar. Left: a "download CV" action styled as a shell command
+// (a real <a download>). Right: section tabs as bordered pills.
+//
+// In-page tab clicks get a timer-based smooth-scroll tween (see <script>),
+// offset by the sticky chrome's height so targets don't hide under it.
+// Tabs whose section isn't built yet fall through to default behavior.
+import LangToggle from './LangToggle.astro';
+
+const tabs = [
+  { label: 'about', href: '#about' },
+  { label: 'projects', href: '#projects' },
+  { label: 'experience', href: '#experience' },
+  { label: 'skills', href: '#stack' },
+  { label: 'github', href: '#github' },
+];
+---
+
+<nav class="nav" aria-label="Primary">
+  <a class="nav__cv" href="/cv.pdf" download>
+    <span class="nav__cv-cmd">$ wget cv.pdf</span>
+    <span class="nav__cv-arrow" aria-hidden="true">↓</span>
+  </a>
+
+  <div class="nav__right">
+    <ul class="nav__tabs">
+      {
+        tabs.map((t) => (
+          <li>
+            <a class="nav__tab" href={t.href}>
+              {t.label}
+            </a>
+          </li>
+        ))
+      }
+    </ul>
+    <LangToggle />
+  </div>
+</nav>
+
+<style>
+  .nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: var(--space-3);
+    padding: var(--space-2) var(--space-4);
+    background-color: var(--panel);
+    border-bottom: 1px solid var(--border);
+  }
+
+  /* CV download — the one amber call-to-action, framed like a command. */
+  .nav__cv {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    font-size: var(--text-xs);
+    color: var(--accent);
+    text-decoration: none;
+    border: 1px solid var(--accent);
+    border-radius: var(--radius-sm);
+    padding: var(--space-1) var(--space-3);
+    background-color: var(--accent-dim);
+    transition:
+      background-color var(--duration-base) var(--ease-out-quart),
+      box-shadow var(--duration-base) var(--ease-out-quart);
+  }
+
+  .nav__cv:hover {
+    text-decoration: none;
+    background-color: var(--accent-ring);
+    color: var(--bg);
+  }
+
+  .nav__cv-arrow {
+    font-weight: var(--weight-bold);
+  }
+
+  .nav__right {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: var(--space-3);
+  }
+
+  .nav__tabs {
+    list-style: none;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+  }
+
+  /* Bordered pills, muted at rest → amber text + border on hover/focus. */
+  .nav__tab {
+    display: inline-block;
+    font-size: var(--text-xs);
+    color: var(--muted);
+    text-decoration: none;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-full);
+    padding: var(--space-1) var(--space-3);
+    transition:
+      color var(--duration-base) var(--ease-out-quart),
+      border-color var(--duration-base) var(--ease-out-quart);
+  }
+
+  .nav__tab:hover,
+  .nav__tab:focus-visible {
+    color: var(--accent);
+    border-color: var(--accent);
+    text-decoration: none;
+  }
+</style>
+
+<script>
+  // Timer-based smooth-scroll tween for in-page nav tabs. We drive it with
+  // requestAnimationFrame + an ease-out cubic rather than relying on
+  // scrollTo({behavior:'smooth'}) — full control over duration and easing,
+  // and a clean instant-jump fallback for reduced-motion users.
+  const reduce = window.matchMedia('(prefers-reduced-motion: reduce)');
+  const easeOutCubic = (t: number) => 1 - Math.pow(1 - t, 3);
+
+  function chromeOffset(): number {
+    const chrome = document.querySelector('.chrome') as HTMLElement | null;
+    return chrome ? chrome.offsetHeight : 0;
+  }
+
+  function tweenScroll(targetY: number, duration = 500) {
+    const startY = window.scrollY;
+    const dist = targetY - startY;
+    if (reduce.matches || Math.abs(dist) < 2) {
+      window.scrollTo(0, targetY);
+      return;
+    }
+    const start = performance.now();
+    function step(now: number) {
+      const t = Math.min(1, (now - start) / duration);
+      window.scrollTo(0, startY + dist * easeOutCubic(t));
+      if (t < 1) requestAnimationFrame(step);
+    }
+    requestAnimationFrame(step);
+  }
+
+  document.querySelectorAll<HTMLAnchorElement>('.nav__tab').forEach((a) => {
+    a.addEventListener('click', (e) => {
+      const id = a.getAttribute('href');
+      if (!id || !id.startsWith('#')) return;
+      const target = document.querySelector(id);
+      if (!target) return; // section not built yet — let the link no-op
+      e.preventDefault();
+      const top =
+        (target as HTMLElement).getBoundingClientRect().top +
+        window.scrollY -
+        chromeOffset() -
+        8; // small breathing gap below the chrome
+      tweenScroll(Math.max(0, top));
+      history.pushState(null, '', id);
+    });
+  });
+</script>

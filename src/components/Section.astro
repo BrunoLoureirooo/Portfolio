@@ -1,26 +1,31 @@
 ---
 // Section — shared wrapper for every content section below the hero.
-// Standardizes: consistent vertical rhythm, max-width, and the prompt-style
-// marker that gives the site its terminal wayfinding (e.g. "~/about").
+// The heading IS a shell command (the brand's terminal wayfinding):
+//   bruno@portfolio (muted) · :~$ (amber) · <cmd> (bright green, glow)
 //
 // Props:
-//   marker — the path label shown in mono accent (the brand's section cue)
-//   id     — anchor target for in-page nav links
-//   title  — visible section heading (sans); also labels the section for a11y
+//   id    — anchor target for in-page nav links
+//   title — accessible section name (labels the section for a11y)
+//   cmd   — the shell command shown as the visible heading, e.g. "cat about.md"
 interface Props {
-  marker: string;
   id: string;
   title: string;
+  cmd: string;
 }
 
-const { marker, id, title } = Astro.props;
+const { id, title, cmd } = Astro.props;
 const headingId = `${id}-heading`;
 ---
 
 <section class="section" id={id} aria-labelledby={headingId}>
   <div class="section__inner">
-    <p class="section__marker" aria-hidden="true">{marker}</p>
-    <h2 class="section__title" id={headingId}>{title}</h2>
+    <h2 class="section__cmd" id={headingId}>
+      <span class="section__user" aria-hidden="true">bruno@portfolio</span><span
+        class="section__mark"
+        aria-hidden="true">:~$</span
+      > <span class="section__name">{cmd}</span>
+      <span class="section__title-sr">{title}</span>
+    </h2>
     <div class="section__body">
       <slot />
     </div>
@@ -39,17 +44,39 @@ const headingId = `${id}-heading`;
     padding-inline: var(--space-6);
   }
 
-  /* Prompt-style marker: mono, accent — terminal wayfinding, not an eyebrow */
-  .section__marker {
-    font-family: var(--font-mono);
-    font-size: var(--text-sm);
-    color: var(--accent);
-    margin-bottom: var(--space-2);
+  /* Prompt-line heading — mono is already global; the command is the star. */
+  .section__cmd {
+    font-size: var(--text-lg);
+    font-weight: var(--weight-regular);
+    letter-spacing: var(--tracking-normal);
+    line-height: var(--leading-snug);
+    margin-bottom: var(--space-8);
   }
 
-  .section__title {
-    font-size: var(--text-2xl);
-    font-weight: var(--weight-semibold);
-    margin-bottom: var(--space-8);
+  .section__user {
+    color: var(--muted);
+  }
+  .section__mark {
+    color: var(--accent);
+  }
+  /* Bright green, glowing — the command carries the section's identity. */
+  .section__name {
+    color: var(--green);
+    font-weight: var(--weight-bold);
+    text-shadow: var(--glow-green);
+  }
+
+  /* Human-readable title for assistive tech only; the visible heading is
+     the command, which reads fine, but this gives a cleaner SR label. */
+  .section__title-sr {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
   }
 </style>
