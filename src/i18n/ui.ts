@@ -41,7 +41,7 @@ export const ui = {
     // the prose values translate. Tagline content fix is tracked separately.
     'hero.lastlogin': 'Last login: Wed Jun 25 14:08:21 on ttys001',
     'hero.cmd': 'whoami',
-    'hero.tagline': 'Backend developer · .NET → JVM',
+    'hero.tagline': 'Backend developer · .NET / JVM',
     'hero.nf.os': 'OS',
     'hero.nf.os.value': 'Arch Linux x86_64',
     'hero.nf.role': 'Role',
@@ -133,7 +133,7 @@ export const ui = {
 
     'hero.lastlogin': 'Last login: Wed Jun 25 14:08:21 on ttys001',
     'hero.cmd': 'whoami',
-    'hero.tagline': 'Programador backend · .NET → JVM',
+    'hero.tagline': 'Programador backend · .NET / JVM',
     'hero.nf.os': 'OS',
     'hero.nf.os.value': 'Arch Linux x86_64',
     'hero.nf.role': 'Role',

@@ -1,0 +1,13 @@
+---
+// Privacy-first analytics (Plausible) — cookieless, no consent banner needed,
+// and host-independent (works on Cloudflare Pages, GitHub Pages, anywhere).
+//
+// Renders ONLY when PUBLIC_PLAUSIBLE_DOMAIN is set at build time, so local dev
+// and unconfigured builds ship zero tracking. Enable it for production:
+//   PUBLIC_PLAUSIBLE_DOMAIN=brunoloureiro.dev pnpm build
+// Self-hosted Plausible? Point PUBLIC_PLAUSIBLE_SRC at your script URL.
+const domain = import.meta.env.PUBLIC_PLAUSIBLE_DOMAIN;
+const src = import.meta.env.PUBLIC_PLAUSIBLE_SRC ?? 'https://plausible.io/js/script.js';
+---
+
+{domain && <script defer data-domain={domain} src={src} is:inline></script>}

@@ -17,7 +17,9 @@
   --green: #00ff00;     /* PRIMARY: prompts, headings, key accents (the star) */
   --fg: #b9f3c0;        /* body text (soft, readable green) */
   --muted: #5f8f68;     /* secondary text, labels */
-  --dim: #3a6a45;       /* tertiary: timestamps, comments, file perms */
+  --dim: #56895f;       /* tertiary: timestamps, comments, file perms.
+                           Raised from #3a6a45 to clear WCAG AA 4.5:1 on --bg
+                           and --panel (it's used as small body text). */
   --accent: #ffb000;    /* amber: the ONE second color — :~$ marks, tags, CV button, section command prompts */
   --status-available: #39d353; /* bright green — "● available for hire" line */
 

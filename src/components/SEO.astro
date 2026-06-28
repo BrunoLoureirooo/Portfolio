@@ -1,0 +1,63 @@
+---
+// SEO — the <head> meta block: canonical, Open Graph, Twitter card, and
+// hreflang alternates. All absolute URLs derive from `Astro.site`
+// (astro.config `site`, overridable via the SITE env var), so this works
+// unchanged whether the host is Cloudflare Pages, GitHub Pages, or the domain.
+interface Props {
+  title: string;
+  description: string;
+  lang: string; // 'en' | 'pt' — drives og:locale + which alternate is "self"
+  image?: string; // site-relative path to the social card
+}
+
+const { title, description, lang, image = '/og.png' } = Astro.props;
+
+// Fallback keeps the component usable if `site` is ever unset (e.g. a stray
+// dev invocation); production always has it.
+const site = Astro.site ?? new URL('https://brunoloureiro.dev');
+
+// Canonical = this page's absolute URL (origin from `site`, path from the URL).
+const canonical = new URL(Astro.url.pathname, site);
+const ogImage = new URL(image, site);
+
+// hreflang alternates. Strip a leading /pt to get the locale-agnostic path,
+// then build both locale URLs from it. en lives at the root, pt under /pt.
+const path = Astro.url.pathname;
+const basePath = path.startsWith('/pt') ? path.replace(/^\/pt/, '') || '/' : path;
+const enUrl = new URL(basePath, site);
+const ptUrl = new URL('/pt' + (basePath === '/' ? '/' : basePath), site);
+
+// Open Graph locale codes + the "other" locale for og:locale:alternate.
+const ogLocale = lang === 'pt' ? 'pt_PT' : 'en_US';
+const ogLocaleAlt = lang === 'pt' ? 'en_US' : 'pt_PT';
+---
+
+<!-- Primary -->
+<title>{title}</title>
+<meta name="description" content={description} />
+<link rel="canonical" href={canonical} />
+<meta name="robots" content="index, follow" />
+<meta name="theme-color" content="#0a0a0a" />
+
+<!-- hreflang: tell search engines the en/pt equivalents of this page -->
+<link rel="alternate" hreflang="en" href={enUrl} />
+<link rel="alternate" hreflang="pt" href={ptUrl} />
+<link rel="alternate" hreflang="x-default" href={enUrl} />
+
+<!-- Open Graph (Facebook, LinkedIn, Slack, iMessage…) -->
+<meta property="og:type" content="website" />
+<meta property="og:site_name" content="Bruno Loureiro" />
+<meta property="og:title" content={title} />
+<meta property="og:description" content={description} />
+<meta property="og:url" content={canonical} />
+<meta property="og:image" content={ogImage} />
+<meta property="og:image:width" content="1200" />
+<meta property="og:image:height" content="630" />
+<meta property="og:locale" content={ogLocale} />
+<meta property="og:locale:alternate" content={ogLocaleAlt} />
+
+<!-- Twitter / X -->
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content={title} />
+<meta name="twitter:description" content={description} />
+<meta name="twitter:image" content={ogImage} />

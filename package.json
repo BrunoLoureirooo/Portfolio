@@ -10,6 +10,7 @@
     "build": "astro build",
     "preview": "astro preview",
     "start": "astro build && wrangler pages dev dist --compatibility-date=2024-11-01",
+    "og": "node scripts/og.mjs",
     "astro": "astro"
   },
   "dependencies": {
@@ -20,8 +21,10 @@
   },
   "devDependencies": {
     "@astrojs/check": "^0.9.9",
+    "@astrojs/sitemap": "^3.7.3",
     "@types/node": "^26.0.1",
     "playwright": "^1.61.1",
+    "sharp": "^0.35.2",
     "typescript": "^6.0.3",
     "wrangler": "^4.105.0"
   }
