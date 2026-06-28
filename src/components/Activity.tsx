@@ -5,36 +5,46 @@
 // /api/activity every ~5 min. See docs/features/github-data.md.
 import type { GitHubData } from '../lib/github';
 import { useGitHubData } from '../lib/useGitHubData';
+import { useTranslations } from '../i18n/utils';
 import './Activity.css';
 
-// "…fetchedAt" → "live · synced 2m ago" / "mock · synced now". Pure helper.
-function syncedLabel(d: GitHubData): string {
+type T = ReturnType<typeof useTranslations>;
+
+// "…fetchedAt" → "live · synced 2m ago". Composed from dictionary parts because
+// the relative-time number is only known at runtime.
+function syncedLabel(d: GitHubData, t: T): string {
   const mins = Math.floor((Date.now() - new Date(d.fetchedAt).getTime()) / 60000);
-  const ago = mins < 1 ? 'just now' : mins < 60 ? `${mins}m ago` : `${Math.floor(mins / 60)}h ago`;
-  return `${d.live ? 'live' : 'mock'} · synced ${ago}`;
+  const ago =
+    mins < 1 ? t('activity.ago.now')
+    : mins < 60 ? `${mins}${t('activity.ago.m')}`
+    : `${Math.floor(mins / 60)}${t('activity.ago.h')}`;
+  const tag = d.live ? t('activity.tag.live') : t('activity.tag.mock');
+  return `${tag} · ${t('activity.synced')} ${ago}`;
 }
 
 interface Props {
   initial: GitHubData; // build-time data: the first paint AND the starting state
+  locale: string | undefined; // passed from the .astro shell (islands can't read Astro.currentLocale)
 }
 
-export default function Activity({ initial }: Props) {
+export default function Activity({ initial, locale }: Props) {
   // The shared hook seeds from `initial` (so hydration matches the server HTML)
   // and swaps in fresh data on each 5-min poll — languages included now.
   const data = useGitHubData(initial);
+  const t = useTranslations(locale);
 
   const stats = [
-    { value: data.totalContributions.toLocaleString(), label: 'contributions · 12mo' },
-    { value: `${data.currentStreak}d`, label: 'current streak' },
-    { value: `${data.longestStreak}d`, label: 'longest streak' },
-    { value: String(data.prsMerged), label: 'PRs merged' },
+    { value: data.totalContributions.toLocaleString(), label: t('activity.stat.contributions') },
+    { value: `${data.currentStreak}d`, label: t('activity.stat.current') },
+    { value: `${data.longestStreak}d`, label: t('activity.stat.longest') },
+    { value: String(data.prsMerged), label: t('activity.stat.prs') },
   ];
 
   return (
     <div class="activity">
       <p class="gh__note">
-        # {data.live ? 'streaming from the GitHub API' : 'mock data — set GITHUB_TOKEN to go live'}
-        <span class="activity__synced">{syncedLabel(data)}</span>
+        # {data.live ? t('activity.live') : t('activity.mock')}
+        <span class="activity__synced">{syncedLabel(data, t)}</span>
       </p>
 
       <ul class="gh__stats">
@@ -48,27 +58,27 @@ export default function Activity({ initial }: Props) {
 
       <figure class="heatmap">
         <figcaption class="heatmap__caption">
-          {data.totalContributions.toLocaleString()} contributions in the last year
+          {data.totalContributions.toLocaleString()} {t('activity.heatmap.caption')}
         </figcaption>
         <div class="heatmap__scroll">
-          <div class="heatmap__grid" role="img" aria-label={`${data.totalContributions} contributions in the last year`}>
+          <div class="heatmap__grid" role="img" aria-label={`${data.totalContributions} ${t('activity.heatmap.caption')}`}>
             {data.cells.map((c, i) => (
               <span class="heatmap__cell" data-level={c.level} key={i} />
             ))}
           </div>
         </div>
         <div class="heatmap__legend" aria-hidden="true">
-          <span>Less</span>
+          <span>{t('activity.heatmap.less')}</span>
           {[0, 1, 2, 3, 4].map((l) => (
             <span class="heatmap__cell" data-level={l} key={l} />
           ))}
-          <span>More</span>
+          <span>{t('activity.heatmap.more')}</span>
         </div>
       </figure>
 
       <div class="gh__panels">
-        <section class="panel" aria-label="Recent commits">
-          <p class="panel__cmd">$ git log --oneline -6</p>
+        <section class="panel" aria-label={t('activity.panel.commits')}>
+          <p class="panel__cmd">{t('activity.cmd.commits')}</p>
           <ul class="commits">
             {data.commits.map((c) => (
               <li class="commit" key={c.hash}>
@@ -81,8 +91,8 @@ export default function Activity({ initial }: Props) {
           </ul>
         </section>
 
-        <section class="panel" aria-label="Top languages">
-          <p class="panel__cmd">$ gh api /langs</p>
+        <section class="panel" aria-label={t('activity.panel.langs')}>
+          <p class="panel__cmd">{t('activity.cmd.langs')}</p>
           <ul class="langs">
             {data.langs.map((l) => (
               <li class="lang" key={l.name}>

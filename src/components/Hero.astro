@@ -12,38 +12,42 @@
 
 import { cvPath } from '../lib/cv';
 import { getCvContent } from '../lib/cvContent';
+import { useTranslations } from '../i18n/utils';
 
 // Picks /CV.pdf or /CV_PT.pdf based on the current route's locale.
 const cvHref = cvPath(Astro.currentLocale);
 
+// Translation accessor for the current locale.
+const t = useTranslations(Astro.currentLocale);
+
 // Contact links come from the CV header — single source, no duplication.
 const { contact } = await getCvContent(Astro.currentLocale);
 
-// Neofetch key/value rows. Hardcoded in Phase 1 (see docs/CONTENT_ARCH.md).
+// Neofetch rows: each is a (label key, value key) pair into the dictionary.
 const info = [
-  { k: 'OS', v: 'Arch Linux x86_64' },
-  { k: 'Role', v: 'Software Developer' },
-  { k: 'Uptime', v: '~3 years coding' },
-  { k: 'Shell', v: 'zsh' },
-  { k: 'Location', v: 'Portugal' },
-  { k: 'Langs', v: 'C#, TypeScript, SQL, Java' },
-];
+  { k: 'hero.nf.os', v: 'hero.nf.os.value' },
+  { k: 'hero.nf.role', v: 'hero.nf.role.value' },
+  { k: 'hero.nf.uptime', v: 'hero.nf.uptime.value' },
+  { k: 'hero.nf.shell', v: 'hero.nf.shell.value' },
+  { k: 'hero.nf.location', v: 'hero.nf.location.value' },
+  { k: 'hero.nf.langs', v: 'hero.nf.langs.value' },
+] as const;
 ---
 
 <section class="hero" id="hero" aria-label="Introduction">
   <div class="hero__inner">
-    <p class="hero__lastlogin">Last login: Wed Jun 25 14:08:21 on ttys001</p>
+    <p class="hero__lastlogin">{t('hero.lastlogin')}</p>
 
     <p class="hero__cmd">
       <span class="hero__user">bruno@portfolio</span><span class="hero__mark"
         >:~$</span
-      > whoami
+      > {t('hero.cmd')}
     </p>
 
     <h1 class="hero__name">Bruno Loureiro</h1>
 
     <p class="hero__tagline" data-typewriter>
-      <span class="hero__tagline-text">Backend developer · .NET → JVM</span><span
+      <span class="hero__tagline-text">{t('hero.tagline')}</span><span
         class="caret"
         aria-hidden="true"></span>
     </p>
@@ -54,16 +58,15 @@ const info = [
         {
           info.map((row) => (
             <div class="neofetch__row">
-              <dt>{row.k}</dt>
-              <dd>{row.v}</dd>
+              <dt>{t(row.k)}</dt>
+              <dd>{t(row.v)}</dd>
             </div>
           ))
         }
         <div class="neofetch__row neofetch__row--status">
-          <dt>Status</dt>
+          <dt>{t('hero.nf.status')}</dt>
           <dd>
-            <span class="neofetch__dot" aria-hidden="true"></span>available for
-            hire
+            <span class="neofetch__dot" aria-hidden="true"></span>{t('hero.nf.status.value')}
           </dd>
         </div>
       </dl>
@@ -72,14 +75,14 @@ const info = [
     <ul class="hero__links">
       <li>
         <a class="pill" href={contact.github} rel="me">
-          ~/github
+          {t('hero.link.github')}
         </a>
       </li>
       <li>
-        <a class="pill" href={`mailto:${contact.email}`}>↳ email</a>
+        <a class="pill" href={`mailto:${contact.email}`}>{t('hero.link.email')}</a>
       </li>
       <li>
-        <a class="pill pill--amber" href={cvHref} download>resume.pdf ↓</a>
+        <a class="pill pill--amber" href={cvHref} download>{t('hero.link.resume')}</a>
       </li>
     </ul>
   </div>

@@ -5,18 +5,21 @@
 import Section from './Section.astro';
 import Activity from './Activity';
 import { getGitHubData } from '../lib/github';
+import { useTranslations } from '../i18n/utils';
+
+const t = useTranslations(Astro.currentLocale);
 
 // Runs at BUILD: real data if a token is set, otherwise deterministic mock.
 // This object is the server-rendered first paint AND the island's initial props.
 const data = await getGitHubData();
 ---
 
-<Section id="github" title="GitHub activity" cmd="gh activity --live">
+<Section id="github" title={t('section.github.title')} cmd={t('section.github.cmd')}>
   {/*
     client:visible — Astro server-renders this island for first paint, then
     ships + hydrates its JS only once the section scrolls into view. After
     hydration it polls /api/activity every ~5 min. `data` is a superset of the
     island's ActivityData prop; langs is passed separately (static, build-time).
   */}
-  <Activity client:visible initial={data} />
+  <Activity client:visible initial={data} locale={Astro.currentLocale} />
 </Section>

@@ -6,14 +6,16 @@
 // the single source.
 import Section from './Section.astro';
 import { getCvContent } from '../lib/cvContent';
+import { useTranslations } from '../i18n/utils';
 
+const t = useTranslations(Astro.currentLocale);
 const { summary } = await getCvContent(Astro.currentLocale);
 const bio =
   summary ||
   'Software engineer focused on backend systems — secure, production-ready services built to stay correct under load.';
 ---
 
-<Section id="about" title="About" cmd="cat about.md">
+<Section id="about" title={t('section.about.title')} cmd={t('section.about.cmd')}>
   <div class="about">
     <p>{bio}</p>
   </div>

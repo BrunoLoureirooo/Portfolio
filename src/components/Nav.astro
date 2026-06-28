@@ -8,32 +8,37 @@
 // Tabs whose section isn't built yet fall through to default behavior.
 import LangToggle from './LangToggle.astro';
 import { cvPath } from '../lib/cv';
+import { useTranslations } from '../i18n/utils';
 
 // Picks /CV.pdf or /CV_PT.pdf based on the current route's locale.
 const cvHref = cvPath(Astro.currentLocale);
 
+// Translation accessor for the current locale.
+const t = useTranslations(Astro.currentLocale);
+
+// Each tab pairs an i18n key with its in-page anchor (anchors aren't text).
 const tabs = [
-  { label: 'about', href: '#about' },
-  { label: 'projects', href: '#projects' },
-  { label: 'experience', href: '#experience' },
-  { label: 'skills', href: '#stack' },
-  { label: 'github', href: '#github' },
-];
+  { key: 'nav.about', href: '#about' },
+  { key: 'nav.projects', href: '#projects' },
+  { key: 'nav.experience', href: '#experience' },
+  { key: 'nav.skills', href: '#stack' },
+  { key: 'nav.github', href: '#github' },
+] as const;
 ---
 
 <nav class="nav" aria-label="Primary">
   <a class="nav__cv" href={cvHref} download>
-    <span class="nav__cv-cmd">$ wget cv.pdf</span>
+    <span class="nav__cv-cmd">{t('nav.cv')}</span>
     <span class="nav__cv-arrow" aria-hidden="true">↓</span>
   </a>
 
   <div class="nav__right">
     <ul class="nav__tabs">
       {
-        tabs.map((t) => (
+        tabs.map((tab) => (
           <li>
-            <a class="nav__tab" href={t.href}>
-              {t.label}
+            <a class="nav__tab" href={tab.href}>
+              {t(tab.key)}
             </a>
           </li>
         ))

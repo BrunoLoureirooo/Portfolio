@@ -6,10 +6,12 @@
 import Section from './Section.astro';
 import ProjectsCarousel from './ProjectsCarousel';
 import { getGitHubData } from '../lib/github';
+import { useTranslations } from '../i18n/utils';
 
+const t = useTranslations(Astro.currentLocale);
 const data = await getGitHubData();
 ---
 
-<Section id="projects" title="Projects" cmd="ls -la ~/projects">
-  <ProjectsCarousel client:visible initial={data} />
+<Section id="projects" title={t('section.projects.title')} cmd={t('section.projects.cmd')}>
+  <ProjectsCarousel client:visible initial={data} locale={Astro.currentLocale} />
 </Section>

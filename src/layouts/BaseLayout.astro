@@ -9,17 +9,21 @@
 import '../styles/tokens.css';
 import '../styles/global.css';
 import Nav from '../components/Nav.astro';
+import { useTranslations } from '../i18n/utils';
 
 interface Props {
-  title: string;
+  title?: string;
   description?: string;
 }
-
-const { title, description = 'Software developer portfolio.' } = Astro.props;
 
 // Astro.currentLocale is set by the i18n router based on the URL
 // (/ → "en", /pt/ → "pt"). Falls back to "en" for safety.
 const lang = Astro.currentLocale ?? 'en';
+const t = useTranslations(lang);
+
+// title/description default to the locale's dictionary values; a page can still
+// override per-page by passing the prop.
+const { title = t('meta.title'), description = t('meta.description') } = Astro.props;
 ---
 
 <!doctype html>
@@ -51,10 +55,10 @@ const lang = Astro.currentLocale ?? 'en';
             <span class="dot dot--yellow"></span>
             <span class="dot dot--green"></span>
           </div>
-          <p class="titlebar__title">bruno@portfolio: ~/dev — zsh — 132×40</p>
+          <p class="titlebar__title">{t('chrome.title')}</p>
           <div class="titlebar__meta">
             <span class="titlebar__enc">UTF-8</span>
-            <time class="titlebar__clock" id="clock" aria-label="Current time"
+            <time class="titlebar__clock" id="clock" aria-label={t('chrome.clock')}
               >--:--:--</time
             >
           </div>

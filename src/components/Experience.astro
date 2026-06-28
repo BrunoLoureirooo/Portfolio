@@ -5,6 +5,9 @@
 import Section from './Section.astro';
 import { getCollection } from 'astro:content';
 import { getCvContent } from '../lib/cvContent';
+import { useTranslations } from '../i18n/utils';
+
+const t = useTranslations(Astro.currentLocale);
 
 // Common shape both sources normalize into for rendering.
 type Entry = {
@@ -42,7 +45,7 @@ if (cv.experience.length) {
 }
 ---
 
-<Section id="experience" title="Experience" cmd="git log --author=bruno --all">
+<Section id="experience" title={t('section.experience.title')} cmd={t('section.experience.cmd')}>
   <ol class="timeline">
     {
       entries.map((entry, idx) => (

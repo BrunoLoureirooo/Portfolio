@@ -5,7 +5,10 @@
 //
 // PHASE 1: pt is a stub that duplicates the EN page. TODO: real translations
 // (see docs/PHASES.md, docs/CONTENT_ARCH.md).
+import { useTranslations } from '../i18n/utils';
+
 const current = Astro.currentLocale ?? 'en';
+const t = useTranslations(current);
 
 const locales = [
   { code: 'en', href: '/' },
@@ -13,7 +16,7 @@ const locales = [
 ];
 ---
 
-<div class="langtoggle" role="group" aria-label="Language">
+<div class="langtoggle" role="group" aria-label={t('lang.aria')}>
   {
     locales.map((l) => (
       <a

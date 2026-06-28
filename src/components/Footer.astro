@@ -3,6 +3,9 @@
 // connection line, social links, and a sign. Mirrors the Hero's prompt idiom
 // to bookend the page.
 import { getCvContent } from '../lib/cvContent';
+import { useTranslations } from '../i18n/utils';
+
+const t = useTranslations(Astro.currentLocale);
 
 // Same CV-sourced contact links as the Hero — one source for both.
 const { contact } = await getCvContent(Astro.currentLocale);
@@ -13,19 +16,19 @@ const { contact } = await getCvContent(Astro.currentLocale);
     <p class="footer__exit">
       <span class="footer__user">bruno@portfolio</span><span class="footer__mark"
         >:~$</span
-      > exit<span class="caret" aria-hidden="true"></span>
+      > {t('footer.exit')}<span class="caret" aria-hidden="true"></span>
     </p>
-    <p class="footer__closed">Connection to brunoloureiro.dev closed.</p>
+    <p class="footer__closed">{t('footer.closed')}</p>
 
     <div class="footer__bar">
       <ul class="footer__links">
-        <li><a href={contact.github} rel="me">github</a></li>
+        <li><a href={contact.github} rel="me">{t('footer.link.github')}</a></li>
         <li>
-          <a href={contact.linkedin} rel="me">linkedin</a>
+          <a href={contact.linkedin} rel="me">{t('footer.link.linkedin')}</a>
         </li>
-        <li><a href={`mailto:${contact.email}`}>email</a></li>
+        <li><a href={`mailto:${contact.email}`}>{t('footer.link.email')}</a></li>
       </ul>
-      <p class="footer__copy">© 2026 · built in vim, btw</p>
+      <p class="footer__copy">{t('footer.copy')}</p>
     </div>
   </div>
 </footer>
