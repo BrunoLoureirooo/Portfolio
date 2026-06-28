@@ -122,6 +122,15 @@ const tabs = [
     border-color: var(--accent);
     text-decoration: none;
   }
+
+  /* On mobile the section tabs are dropped — the page is one scroll, so they
+     add clutter without much value. CV download + language toggle stay.
+     Same 640px cutoff the title bar uses. */
+  @media (max-width: 640px) {
+    .nav__tabs {
+      display: none;
+    }
+  }
 </style>
 
 <script>
