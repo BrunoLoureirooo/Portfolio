@@ -13,9 +13,22 @@ export type CvRole = {
   stack: string[]; // inferred from the bullets (CV has no per-role tag field)
 };
 
+// Identity / contact block from the CV header — the single source for these
+// across the site (Hero links, Footer links). All fields live on one line of
+// the PDF, right before the Summary header.
+export type CvContact = {
+  name: string;
+  location: string;
+  phone: string;
+  email: string;
+  linkedin: string;
+  github: string;
+};
+
 export type CvContent = {
   summary: string;
   experience: CvRole[];
+  contact: CvContact;
 };
 
 // Which PDF to read per locale (filesystem paths, relative to project root).
@@ -106,6 +119,30 @@ function parseExperience(block: string): CvRole[] {
   ];
 }
 
+// Pull the identity block out of the CV header (the text before "Summary").
+// Each field is matched independently, so a missing/odd field yields '' rather
+// than breaking the others. URLs are captured whole; the rest by shape.
+function parseContact(header: string): CvContact {
+  const first = (re: RegExp) => header.match(re)?.[0]?.trim() ?? '';
+  // Leading all-caps run; each word 2+ letters so it can't eat the capital
+  // that starts the next, mixed-case word (e.g. the "M" of "Marinha").
+  const name = first(/^[A-ZÀ-Ý]{2,}(?:\s+[A-ZÀ-Ý]{2,})*/);
+  return {
+    name,
+    // Location sits between the name and the first "•" separator.
+    location: header.slice(name.length).split('•')[0]?.trim() ?? '',
+    phone: first(/\+\d[\d ]{6,}\d/),
+    email: first(/[\w.+-]+@[\w-]+\.[\w.-]+/),
+    linkedin: first(/https?:\/\/(?:www\.)?linkedin\.com\/in\/[^\s•]+/i),
+    github: first(/https?:\/\/(?:www\.)?github\.com\/[^\s•]+/i),
+  };
+}
+
+// A blank contact — the fallback shape when parsing can't run at all.
+const EMPTY_CONTACT: CvContact = {
+  name: '', location: '', phone: '', email: '', linkedin: '', github: '',
+};
+
 // Public entry: read the locale's CV and parse it. Any failure — missing file,
 // extraction error, or headers that moved — returns empty content so callers
 // fall back to their static defaults. The build never breaks on a bad parse.
@@ -114,12 +151,15 @@ export async function getCvContent(locale: string | undefined): Promise<CvConten
   const h = HEADERS[key];
   try {
     const text = await extractCvText(CV_FILE[key]);
+    const headerEnd = text.indexOf(h.sumStart);
+    const header = headerEnd === -1 ? '' : text.slice(0, headerEnd);
     return {
       summary: between(text, h.sumStart, h.sumEnd),
       experience: parseExperience(between(text, h.expStart, h.expEnd)),
+      contact: parseContact(header),
     };
   } catch (err) {
     console.warn('[cv] parse failed, using fallback:', err);
-    return { summary: '', experience: [] };
+    return { summary: '', experience: [], contact: EMPTY_CONTACT };
   }
 }

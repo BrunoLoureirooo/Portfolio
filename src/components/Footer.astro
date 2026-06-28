@@ -2,6 +2,10 @@
 // Footer — the terminal sign-off. `exit` with a blinking caret, a closed-
 // connection line, social links, and a sign. Mirrors the Hero's prompt idiom
 // to bookend the page.
+import { getCvContent } from '../lib/cvContent';
+
+// Same CV-sourced contact links as the Hero — one source for both.
+const { contact } = await getCvContent(Astro.currentLocale);
 ---
 
 <footer class="footer">
@@ -15,11 +19,11 @@
 
     <div class="footer__bar">
       <ul class="footer__links">
-        <li><a href="https://github.com/BrunoLoureirooo" rel="me">github</a></li>
+        <li><a href={contact.github} rel="me">github</a></li>
         <li>
-          <a href="https://www.linkedin.com/in/brunoloureiro-/" rel="me">linkedin</a>
+          <a href={contact.linkedin} rel="me">linkedin</a>
         </li>
-        <li><a href="mailto:BrunoLoureiroProfessional@proton.me">email</a></li>
+        <li><a href={`mailto:${contact.email}`}>email</a></li>
       </ul>
       <p class="footer__copy">© 2026 · built in vim, btw</p>
     </div>

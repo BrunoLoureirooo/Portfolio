@@ -17,7 +17,11 @@ Build-time only (Node). `src/lib/cvContent.ts`:
     `{ title, company, start, end, bullets[] }`, bullets split on `●`.
 - **Per-role stack:** the CV has no per-role tag field, so infer it by scanning
   each role's bullets against a tech keyword list.
-- `getCvContent(locale)` returns `{ summary, experience }`.
+- **contact** = the header block before `Summary` → `{ name, location, phone,
+  email, linkedin, github }`, each field matched by its own regex (URLs whole,
+  the rest by shape) so one odd field can't blank the others. Single source for
+  the Hero + Footer links.
+- `getCvContent(locale)` returns `{ summary, experience, contact }`.
 
 ## Resilience (the cost of PDF-as-source)
 
@@ -33,6 +37,8 @@ PDF text extraction is coupled to the CV's headers/layout. So:
 - `About.astro` → renders `summary` (fallback string if empty).
 - `Experience.astro` → renders parsed roles with their bullets (2–3 per DESIGN);
   falls back to the `experience` content collection if parsing yields nothing.
+- `Hero.astro` / `Footer.astro` → render `contact.{github,email,linkedin}`; no
+  contact value is hardcoded in markup anymore.
 
 ## i18n
 

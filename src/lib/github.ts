@@ -296,30 +296,53 @@ async function fetchLanguages(token: string, username: string): Promise<Lang[]> 
 // ---- Live fetch: REST events → recent commits -----------------------------
 
 async function fetchCommits(token: string, username: string): Promise<Commit[]> {
+  // GitHub trims the events payload — a PushEvent now carries only the `head`
+  // SHA, not the commit messages. So: collect (repo, head SHA, time) from recent
+  // pushes, then fetch each commit's real details for the message + line stats.
   const res = await fetch(
-    `https://api.github.com/users/${username}/events/public?per_page=100`,
+    `https://api.github.com/users/${username}/events?per_page=100`,
     { headers: ghHeaders(token, username) },
   );
   if (!res.ok) throw new Error(`events: ${res.status}`);
   const events: any[] = await res.json();
 
-  // The events feed is mixed (stars, PRs, pushes…). Keep only PushEvents and
-  // flatten their commits until we have 6, newest first.
-  const commits: Commit[] = [];
+  const seen = new Set<string>();
+  const pushes: { repo: string; sha: string; at: string }[] = [];
   for (const ev of events) {
     if (ev.type !== 'PushEvent') continue;
-    const repo = ev.repo?.name?.split('/').pop() ?? ev.repo?.name ?? '';
-    for (const c of ev.payload?.commits ?? []) {
-      commits.push({
-        hash: String(c.sha).slice(0, 7), // short hash
-        repo,
-        meta: relativeTime(ev.created_at),
-        msg: String(c.message).split('\n')[0], // first line only
-      });
-      if (commits.length >= 6) return commits;
-    }
+    const sha = ev.payload?.head;
+    const repo = ev.repo?.name; // "owner/repo"
+    if (!sha || !repo || seen.has(sha)) continue;
+    seen.add(sha);
+    pushes.push({ repo, sha, at: ev.created_at });
+    if (pushes.length >= 6) break;
   }
-  return commits;
+
+  // Fetch each commit's message + additions/deletions, in parallel.
+  const results = await Promise.all(
+    pushes.map(async (p): Promise<Commit | null> => {
+      try {
+        const r = await fetch(
+          `https://api.github.com/repos/${p.repo}/commits/${p.sha}`,
+          { headers: ghHeaders(token, username) },
+        );
+        if (!r.ok) return null;
+        const c: any = await r.json();
+        const add = c.stats?.additions ?? 0;
+        const del = c.stats?.deletions ?? 0;
+        return {
+          hash: p.sha.slice(0, 7),
+          repo: p.repo.split('/').pop() ?? p.repo,
+          meta: `${relativeTime(p.at)} · +${add} −${del}`,
+          msg: String(c.commit?.message ?? '').split('\n')[0],
+        };
+      } catch {
+        return null;
+      }
+    }),
+  );
+
+  return results.filter((c): c is Commit => c !== null);
 }
 
 // ---- Live fetch: GraphQL → contribution calendar + merged PRs --------------

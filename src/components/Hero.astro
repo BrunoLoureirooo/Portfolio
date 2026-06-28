@@ -11,9 +11,13 @@
 // GitHub API. This static markup stays the fallback — keep it stable.
 
 import { cvPath } from '../lib/cv';
+import { getCvContent } from '../lib/cvContent';
 
 // Picks /CV.pdf or /CV_PT.pdf based on the current route's locale.
 const cvHref = cvPath(Astro.currentLocale);
+
+// Contact links come from the CV header — single source, no duplication.
+const { contact } = await getCvContent(Astro.currentLocale);
 
 // Neofetch key/value rows. Hardcoded in Phase 1 (see docs/CONTENT_ARCH.md).
 const info = [
@@ -67,12 +71,12 @@ const info = [
 
     <ul class="hero__links">
       <li>
-        <a class="pill" href="https://github.com/BrunoLoureirooo" rel="me">
+        <a class="pill" href={contact.github} rel="me">
           ~/github
         </a>
       </li>
       <li>
-        <a class="pill" href="mailto:bloureiro2004@gmail.com">↳ email</a>
+        <a class="pill" href={`mailto:${contact.email}`}>↳ email</a>
       </li>
       <li>
         <a class="pill pill--amber" href={cvHref} download>resume.pdf ↓</a>
