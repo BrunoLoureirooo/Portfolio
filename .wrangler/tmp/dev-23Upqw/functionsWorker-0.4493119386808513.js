@@ -1,60 +1,9 @@
 var __defProp = Object.defineProperty;
 var __name = (target, value) => __defProp(target, "name", { value, configurable: true });
 
-// .wrangler/tmp/bundle-JXkyyF/checked-fetch.js
-var urls = /* @__PURE__ */ new Set();
-function checkURL(request, init) {
-  const url = request instanceof URL ? request : new URL(
-    (typeof request === "string" ? new Request(request, init) : request).url
-  );
-  if (url.port && url.port !== "443" && url.protocol === "https:") {
-    if (!urls.has(url.toString())) {
-      urls.add(url.toString());
-      console.warn(
-        `WARNING: known issue with \`fetch()\` requests to custom HTTPS ports in published Workers:
- - ${url.toString()} - the custom port will be ignored when the Worker is published using the \`wrangler deploy\` command.
-`
-      );
-    }
-  }
-}
-__name(checkURL, "checkURL");
-globalThis.fetch = new Proxy(globalThis.fetch, {
-  apply(target, thisArg, argArray) {
-    const [request, init] = argArray;
-    checkURL(request, init);
-    return Reflect.apply(target, thisArg, argArray);
-  }
-});
-
-// .wrangler/tmp/pages-yDmzLc/functionsWorker-0.49873453062664386.mjs
+// .wrangler/tmp/pages-kcbiJs/functionsWorker-0.4493119386808513.mjs
 var __defProp2 = Object.defineProperty;
 var __name2 = /* @__PURE__ */ __name((target, value) => __defProp2(target, "name", { value, configurable: true }), "__name");
-var urls2 = /* @__PURE__ */ new Set();
-function checkURL2(request, init) {
-  const url = request instanceof URL ? request : new URL(
-    (typeof request === "string" ? new Request(request, init) : request).url
-  );
-  if (url.port && url.port !== "443" && url.protocol === "https:") {
-    if (!urls2.has(url.toString())) {
-      urls2.add(url.toString());
-      console.warn(
-        `WARNING: known issue with \`fetch()\` requests to custom HTTPS ports in published Workers:
- - ${url.toString()} - the custom port will be ignored when the Worker is published using the \`wrangler deploy\` command.
-`
-      );
-    }
-  }
-}
-__name(checkURL2, "checkURL");
-__name2(checkURL2, "checkURL");
-globalThis.fetch = new Proxy(globalThis.fetch, {
-  apply(target, thisArg, argArray) {
-    const [request, init] = argArray;
-    checkURL2(request, init);
-    return Reflect.apply(target, thisArg, argArray);
-  }
-});
 function readEnv(key) {
   const viteEnv = import.meta?.env;
   if (viteEnv?.[key]) return viteEnv[key];
@@ -170,12 +119,6 @@ function mockData() {
 }
 __name(mockData, "mockData");
 __name2(mockData, "mockData");
-function mockActivity() {
-  const { langs: _langs, projects: _projects, ...activity } = mockData();
-  return activity;
-}
-__name(mockActivity, "mockActivity");
-__name2(mockActivity, "mockActivity");
 var ghHeaders = /* @__PURE__ */ __name2((token, username) => ({
   Authorization: `Bearer ${token}`,
   Accept: "application/vnd.github+json",
@@ -200,6 +143,59 @@ function relativeTime(iso) {
 }
 __name(relativeTime, "relativeTime");
 __name2(relativeTime, "relativeTime");
+async function fetchProjects(token, username) {
+  const res = await fetch(
+    `https://api.github.com/users/${username}/repos?per_page=100&sort=pushed`,
+    { headers: ghHeaders(token, username) }
+  );
+  if (!res.ok) throw new Error(`repos: ${res.status}`);
+  const repos = await res.json();
+  const owned = repos.filter((r) => !r.fork && !r.archived);
+  const now = Date.now();
+  const projects = [...owned].sort((a, b) => b.stargazers_count - a.stargazers_count).map((r) => ({
+    name: r.name,
+    status: now - new Date(r.pushed_at).getTime() < 60 * 864e5 ? "active" : "stable",
+    description: r.description ?? "\u2014",
+    tags: [r.language].filter(Boolean),
+    // primary language as the one tag
+    repo: r.html_url,
+    live: r.homepage || void 0,
+    stars: r.stargazers_count
+  }));
+  return projects;
+}
+__name(fetchProjects, "fetchProjects");
+__name2(fetchProjects, "fetchProjects");
+async function fetchLanguages(token, username) {
+  const query = `
+    query($login: String!) {
+      user(login: $login) {
+        repositories(first: 100, ownerAffiliations: OWNER, isFork: false) {
+          nodes {
+            languages(first: 10, orderBy: { field: SIZE, direction: DESC }) {
+              edges { size node { name } }
+            }
+          }
+        }
+      }
+    }`;
+  const res = await fetch("https://api.github.com/graphql", {
+    method: "POST",
+    headers: { ...ghHeaders(token, username), "Content-Type": "application/json" },
+    body: JSON.stringify({ query, variables: { login: username } })
+  });
+  if (!res.ok) throw new Error(`graphql langs: ${res.status}`);
+  const json = await res.json();
+  if (json.errors) throw new Error(`graphql langs: ${JSON.stringify(json.errors)}`);
+  const bytes = /* @__PURE__ */ new Map();
+  for (const repo of json.data.user.repositories.nodes)
+    for (const e of repo.languages.edges)
+      bytes.set(e.node.name, (bytes.get(e.node.name) ?? 0) + e.size);
+  const total = [...bytes.values()].reduce((s, b) => s + b, 0) || 1;
+  return [...bytes.entries()].sort((a, b) => b[1] - a[1]).slice(0, 5).map(([name, b]) => ({ name, pct: Math.round(b / total * 100) }));
+}
+__name(fetchLanguages, "fetchLanguages");
+__name2(fetchLanguages, "fetchLanguages");
 async function fetchCommits(token, username) {
   const res = await fetch(
     `https://api.github.com/users/${username}/events/public?per_page=100`,
@@ -267,11 +263,13 @@ async function fetchContributions(token, username) {
 }
 __name(fetchContributions, "fetchContributions");
 __name2(fetchContributions, "fetchContributions");
-async function fetchLiveActivity(token, username = GITHUB_USERNAME) {
+async function fetchLiveData(token, username = GITHUB_USERNAME) {
   const fetchedAt = (/* @__PURE__ */ new Date()).toISOString();
-  if (!token) return { ...mockActivity(), fetchedAt, live: false };
+  if (!token) return { ...mockData(), fetchedAt, live: false };
   try {
-    const [commits, contrib] = await Promise.all([
+    const [projects, langs, commits, contrib] = await Promise.all([
+      fetchProjects(token, username),
+      fetchLanguages(token, username),
       fetchCommits(token, username),
       fetchContributions(token, username)
     ]);
@@ -283,24 +281,26 @@ async function fetchLiveActivity(token, username = GITHUB_USERNAME) {
       longestStreak: contrib.longest,
       prsMerged: contrib.prsMerged,
       cells: contrib.cells,
-      commits
+      commits,
+      langs,
+      projects
     };
   } catch (err) {
-    console.warn("[github] live activity fetch failed, using mock:", err);
-    return { ...mockActivity(), fetchedAt, live: false };
+    console.warn("[github] live fetch failed, using mock:", err);
+    return { ...mockData(), fetchedAt, live: false };
   }
 }
-__name(fetchLiveActivity, "fetchLiveActivity");
-__name2(fetchLiveActivity, "fetchLiveActivity");
+__name(fetchLiveData, "fetchLiveData");
+__name2(fetchLiveData, "fetchLiveData");
 var CACHE_SECONDS = 300;
 var onRequestGet = /* @__PURE__ */ __name2(async (context) => {
   const cache = caches.default;
   const cacheKey = new Request(new URL(context.request.url).toString(), context.request);
   const hit = await cache.match(cacheKey);
   if (hit) return hit;
-  const data = await fetchLiveActivity(
+  const data = await fetchLiveData(
     context.env.GITHUB_TOKEN ?? "",
-    // no token on Cloudflare → fetchLiveActivity returns mock
+    // no token on Cloudflare → fetchLiveData returns mock
     context.env.GITHUB_USERNAME
   );
   const res = new Response(JSON.stringify(data), {
@@ -948,7 +948,7 @@ if (typeof middleware_insertion_facade_default === "object") {
 }
 var middleware_loader_entry_default = WRAPPED_ENTRY;
 
-// ../../.npm/_npx/32026684e21afda6/node_modules/wrangler/templates/middleware/middleware-ensure-req-body-drained.ts
+// node_modules/.pnpm/wrangler@4.105.0/node_modules/wrangler/templates/middleware/middleware-ensure-req-body-drained.ts
 var drainBody2 = /* @__PURE__ */ __name(async (request, env, _ctx, middlewareCtx) => {
   try {
     return await middlewareCtx.next(request, env);
@@ -966,7 +966,7 @@ var drainBody2 = /* @__PURE__ */ __name(async (request, env, _ctx, middlewareCtx
 }, "drainBody");
 var middleware_ensure_req_body_drained_default2 = drainBody2;
 
-// ../../.npm/_npx/32026684e21afda6/node_modules/wrangler/templates/middleware/middleware-miniflare3-json-error.ts
+// node_modules/.pnpm/wrangler@4.105.0/node_modules/wrangler/templates/middleware/middleware-miniflare3-json-error.ts
 function reduceError2(e) {
   return {
     name: e?.name,
@@ -989,14 +989,14 @@ var jsonError2 = /* @__PURE__ */ __name(async (request, env, _ctx, middlewareCtx
 }, "jsonError");
 var middleware_miniflare3_json_error_default2 = jsonError2;
 
-// .wrangler/tmp/bundle-JXkyyF/middleware-insertion-facade.js
+// .wrangler/tmp/bundle-azpgsR/middleware-insertion-facade.js
 var __INTERNAL_WRANGLER_MIDDLEWARE__2 = [
   middleware_ensure_req_body_drained_default2,
   middleware_miniflare3_json_error_default2
 ];
 var middleware_insertion_facade_default2 = middleware_loader_entry_default;
 
-// ../../.npm/_npx/32026684e21afda6/node_modules/wrangler/templates/middleware/common.ts
+// node_modules/.pnpm/wrangler@4.105.0/node_modules/wrangler/templates/middleware/common.ts
 var __facade_middleware__2 = [];
 function __facade_register__2(...args) {
   __facade_middleware__2.push(...args.flat());
@@ -1021,7 +1021,7 @@ function __facade_invoke__2(request, env, ctx, dispatch, finalMiddleware) {
 }
 __name(__facade_invoke__2, "__facade_invoke__");
 
-// .wrangler/tmp/bundle-JXkyyF/middleware-loader.entry.ts
+// .wrangler/tmp/bundle-azpgsR/middleware-loader.entry.ts
 var __Facade_ScheduledController__2 = class ___Facade_ScheduledController__2 {
   constructor(scheduledTime, cron, noRetry) {
     this.scheduledTime = scheduledTime;
@@ -1123,4 +1123,4 @@ export {
   __INTERNAL_WRANGLER_MIDDLEWARE__2 as __INTERNAL_WRANGLER_MIDDLEWARE__,
   middleware_loader_entry_default2 as default
 };
-//# sourceMappingURL=functionsWorker-0.49873453062664386.js.map
+//# sourceMappingURL=functionsWorker-0.4493119386808513.js.map

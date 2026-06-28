@@ -1,8 +1,10 @@
 onlyBuiltDependencies:
   - esbuild
   - sharp
+  - workerd
 allowBuilds:
   esbuild: true
   sharp: true
+  workerd: true
 minimumReleaseAgeExclude:
   - preact@10.29.3

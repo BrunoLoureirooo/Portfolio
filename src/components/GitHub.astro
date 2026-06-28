@@ -18,5 +18,5 @@ const data = await getGitHubData();
     hydration it polls /api/activity every ~5 min. `data` is a superset of the
     island's ActivityData prop; langs is passed separately (static, build-time).
   */}
-  <Activity client:visible initial={data} langs={data.langs} />
+  <Activity client:visible initial={data} />
 </Section>

@@ -2,10 +2,10 @@
 // Runs on the Workers edge (not Node, not the browser). Any file under the
 // top-level functions/ folder becomes an endpoint by its path. Its jobs:
 //   1. hold GITHUB_TOKEN server-side (never exposed to the browser),
-//   2. return the live ActivityData JSON the Preact island polls,
-//   3. (next unit) cache the result ~5 min.
+//   2. return the live GitHubData JSON the islands poll (projects, langs, activity),
+//   3. cache the result ~5 min.
 // See docs/features/github-data.md.
-import { fetchLiveActivity } from '../../src/lib/github';
+import { fetchLiveData } from '../../src/lib/github';
 
 // Cloudflare injects secrets/vars on `context.env`. Declare what we read.
 interface Env {
@@ -33,8 +33,8 @@ export const onRequestGet = async (context: Ctx): Promise<Response> => {
   const hit = await cache.match(cacheKey);
   if (hit) return hit;
 
-  const data = await fetchLiveActivity(
-    context.env.GITHUB_TOKEN ?? '', // no token on Cloudflare → fetchLiveActivity returns mock
+  const data = await fetchLiveData(
+    context.env.GITHUB_TOKEN ?? '', // no token on Cloudflare → fetchLiveData returns mock
     context.env.GITHUB_USERNAME,
   );
 

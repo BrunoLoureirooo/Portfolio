@@ -1,56 +1,27 @@
 // Activity — the live GitHub island (Preact, hydrated client:visible).
 //
-// Renders the activity block (stats, heatmap, commits) + the static langs
-// panel. Server-rendered by Astro for first paint, then hydrated to poll
+// Renders stats, heatmap, commits, AND languages — all live via the shared
+// useGitHubData hook. Server-rendered by Astro for first paint, then polls
 // /api/activity every ~5 min. See docs/features/github-data.md.
-import { useState, useEffect } from 'preact/hooks';
-import type { ActivityData, Lang } from '../lib/github';
+import type { GitHubData } from '../lib/github';
+import { useGitHubData } from '../lib/useGitHubData';
 import './Activity.css';
 
 // "…fetchedAt" → "live · synced 2m ago" / "mock · synced now". Pure helper.
-function syncedLabel(d: ActivityData): string {
+function syncedLabel(d: GitHubData): string {
   const mins = Math.floor((Date.now() - new Date(d.fetchedAt).getTime()) / 60000);
   const ago = mins < 1 ? 'just now' : mins < 60 ? `${mins}m ago` : `${Math.floor(mins / 60)}h ago`;
   return `${d.live ? 'live' : 'mock'} · synced ${ago}`;
 }
 
 interface Props {
-  initial: ActivityData; // build-time data: the first paint AND the starting state
-  langs: Lang[]; // build-time, never refreshed (the hybrid "slow" half)
+  initial: GitHubData; // build-time data: the first paint AND the starting state
 }
 
-export default function Activity({ initial, langs }: Props) {
-  // `data` starts as the server-rendered `initial`, so hydration is seamless:
-  // the DOM Preact takes over already matches this value. Polling calls setData
-  // later, which re-renders just this component.
-  const [data, setData] = useState<ActivityData>(initial);
-
-  // useEffect runs ONLY in the browser, after hydration — never at build. So
-  // the network polling lives here, not in the component body. Empty dep array
-  // [] = "run once on mount".
-  useEffect(() => {
-    let alive = true; // guard against setState after unmount
-
-    const refresh = async () => {
-      try {
-        const res = await fetch('/api/activity');
-        if (!res.ok) return; // endpoint absent (e.g. `astro dev`) → keep current data
-        const next = (await res.json()) as ActivityData;
-        if (alive) setData(next);
-      } catch {
-        /* network blip → keep showing the last good data */
-      }
-    };
-
-    refresh(); // once on mount (the server data may already be minutes old)
-    const id = setInterval(refresh, 5 * 60 * 1000); // then every 5 min
-
-    // Cleanup: stop the timer and ignore any in-flight response on unmount.
-    return () => {
-      alive = false;
-      clearInterval(id);
-    };
-  }, []);
+export default function Activity({ initial }: Props) {
+  // The shared hook seeds from `initial` (so hydration matches the server HTML)
+  // and swaps in fresh data on each 5-min poll — languages included now.
+  const data = useGitHubData(initial);
 
   const stats = [
     { value: data.totalContributions.toLocaleString(), label: 'contributions · 12mo' },
@@ -113,7 +84,7 @@ export default function Activity({ initial, langs }: Props) {
         <section class="panel" aria-label="Top languages">
           <p class="panel__cmd">$ gh api /langs</p>
           <ul class="langs">
-            {langs.map((l) => (
+            {data.langs.map((l) => (
               <li class="lang" key={l.name}>
                 <span class="lang__name">{l.name}</span>
                 <span class="lang__pct">{l.pct}%</span>

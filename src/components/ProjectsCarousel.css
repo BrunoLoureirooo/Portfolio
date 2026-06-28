@@ -1,0 +1,126 @@
+/* Projects carousel styles. Plain CSS (not an Astro scoped <style>) because the
+   island's hydrated DOM isn't processed by Astro's scoper. Moved verbatim from
+   the old Projects.astro <style>. Values come from the global tokens. */
+
+.projects {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  /* Carousel: one horizontal row that scrolls instead of wrapping. */
+  display: flex;
+  gap: var(--space-4);
+  overflow-x: auto;
+  /* Snap each card to the start edge as you scroll, so it never stops mid-card. */
+  scroll-snap-type: x mandatory;
+  /* A snapped card aligns flush with the row's left padding, not under it. */
+  scroll-padding-inline: var(--space-1);
+  padding-block: var(--space-2); /* room for the hover lift + focus ring */
+  /* Thin, themed scrollbar — keeps the affordance without the chunky default. */
+  scrollbar-width: thin;
+  scrollbar-color: var(--border) transparent;
+}
+.projects:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 4px;
+  border-radius: var(--radius-sm);
+}
+.projects::-webkit-scrollbar {
+  height: 6px;
+}
+.projects::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: var(--radius-full);
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  /* Carousel item sizing: divide the row by ~3.2 so three cards show on load
+     plus a sliver of the fourth — the cue that more exist. max() keeps cards
+     readable (≥260px) on narrow screens. flex-shrink 0 = scroll, don't squeeze. */
+  flex: 0 0 max(260px, calc((100% - 2 * var(--space-4)) / 3.2));
+  scroll-snap-align: start;
+  gap: var(--space-3);
+  padding: var(--space-5);
+  background-color: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  /* Lift + glow on hover. transform/box-shadow only — no layout reflow. */
+  transition:
+    transform var(--duration-base) var(--ease-out-quart),
+    border-color var(--duration-base) var(--ease-out-quart),
+    box-shadow var(--duration-base) var(--ease-out-quart);
+}
+.card:hover {
+  transform: translateY(-2px);
+  border-color: var(--green);
+  box-shadow: var(--glow-green);
+}
+
+.card__head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+.card__name {
+  color: var(--green);
+  font-weight: var(--weight-bold);
+}
+
+.card__status {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  font-size: var(--text-xs);
+}
+.card__status--active {
+  color: var(--status-available);
+}
+.card__status--stable {
+  color: var(--muted);
+}
+
+.card__desc {
+  color: var(--muted);
+  font-size: var(--text-sm);
+  line-height: var(--leading-normal);
+}
+
+.card__tags {
+  list-style: none;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin-top: auto; /* push tags + footer to the bottom for even card rows */
+}
+.chip {
+  font-size: var(--text-xs);
+  color: var(--accent);
+  border: 1px solid var(--accent-ring);
+  border-radius: var(--radius-full);
+  padding: 0 var(--space-2);
+}
+
+.card__foot {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  font-size: var(--text-xs);
+  padding-top: var(--space-2);
+  border-top: 1px solid var(--border);
+}
+.card__link {
+  color: var(--green);
+  text-decoration: none;
+}
+.card__link:hover {
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+}
+.card__stars {
+  margin-left: auto;
+  color: var(--dim);
+}

@@ -1,15 +1,45 @@
 ---
-// Experience — `git log` as a vertical timeline, newest-first. Content comes
-// from the `experience` collection (drop a .md file to add a role; see
-// docs/CONTENT_ARCH.md). The newest node glows; older nodes are dim.
+// Experience — `git log` as a vertical timeline, newest-first. PRIMARY source
+// is the CV (getCvContent, locale-aware); if parsing yields nothing it falls
+// back to the `experience` content collection. The newest node glows.
 import Section from './Section.astro';
 import { getCollection } from 'astro:content';
+import { getCvContent } from '../lib/cvContent';
 
-const entries = (await getCollection('experience')).sort(
-  (a, b) => b.data.start.getTime() - a.data.start.getTime(),
-);
+// Common shape both sources normalize into for rendering.
+type Entry = {
+  period: string; // "[ 2025 — present ]"
+  title: string;
+  company: string;
+  bullets: string[];
+  stack: string[];
+};
 
-const year = (d: Date) => d.getUTCFullYear();
+const yearOf = (mmYYYY: string) => mmYYYY.split('/')[1] ?? mmYYYY;
+
+const cv = await getCvContent(Astro.currentLocale);
+
+let entries: Entry[];
+if (cv.experience.length) {
+  entries = cv.experience.map((r) => ({
+    period: `[ ${yearOf(r.start)} — ${r.end ? yearOf(r.end) : 'present'} ]`,
+    title: r.title,
+    company: r.company,
+    bullets: r.bullets,
+    stack: r.stack,
+  }));
+} else {
+  const coll = (await getCollection('experience')).sort(
+    (a, b) => b.data.start.getTime() - a.data.start.getTime(),
+  );
+  entries = coll.map((e) => ({
+    period: `[ ${e.data.start.getUTCFullYear()} — ${e.data.end ? e.data.end.getUTCFullYear() : 'present'} ]`,
+    title: e.data.title,
+    company: e.data.company,
+    bullets: [e.data.description],
+    stack: e.data.stack,
+  }));
+}
 ---
 
 <Section id="experience" title="Experience" cmd="git log --author=bruno --all">
@@ -21,15 +51,18 @@ const year = (d: Date) => d.getUTCFullYear();
             class:list={['entry__node', { 'entry__node--head': idx === 0 }]}
             aria-hidden="true"
           />
-          <p class="entry__period">
-            [ {year(entry.data.start)} —{' '}
-            {entry.data.end ? year(entry.data.end) : 'present'} ]
-          </p>
+          <p class="entry__period">{entry.period}</p>
           <h3 class="entry__role">
-            {entry.data.title} @ {entry.data.company}
+            {entry.title} @ {entry.company}
           </h3>
-          <p class="entry__desc">{entry.data.description}</p>
-          <p class="entry__stack">{entry.data.stack.join(' · ')}</p>
+          <ul class="entry__bullets">
+            {entry.bullets.map((b) => (
+              <li>{b}</li>
+            ))}
+          </ul>
+          {entry.stack.length > 0 && (
+            <p class="entry__stack">{entry.stack.join(' · ')}</p>
+          )}
         </li>
       ))
     }
@@ -85,12 +118,27 @@ const year = (d: Date) => d.getUTCFullYear();
     font-size: var(--text-lg);
     margin-bottom: var(--space-2);
   }
-  .entry__desc {
+  .entry__bullets {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 var(--space-3);
+    max-width: var(--measure);
+    display: grid;
+    gap: var(--space-2);
+  }
+  .entry__bullets li {
+    position: relative;
+    padding-left: var(--space-4);
     color: var(--fg);
     font-size: var(--text-sm);
     line-height: var(--leading-normal);
-    max-width: var(--measure);
-    margin-bottom: var(--space-2);
+  }
+  /* Terminal-style bullet marker in amber. */
+  .entry__bullets li::before {
+    content: '▸';
+    position: absolute;
+    left: 0;
+    color: var(--accent);
   }
   .entry__stack {
     color: var(--dim);

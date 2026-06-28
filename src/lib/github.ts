@@ -188,13 +188,6 @@ function mockData(): Omit<GitHubData, 'fetchedAt' | 'live'> {
   };
 }
 
-// The activity-only slice of the mock (the edge function only deals in activity,
-// never projects/langs). Destructure those two off and keep the rest.
-function mockActivity(): Omit<ActivityData, 'fetchedAt' | 'live'> {
-  const { langs: _langs, projects: _projects, ...activity } = mockData();
-  return activity;
-}
-
 // ---- Live fetch: small utilities ------------------------------------------
 
 // Auth + identity headers, built per-call (not a module global) so the SAME
@@ -378,61 +371,29 @@ async function fetchContributions(
   };
 }
 
-// ---- Public entry point #1: live activity (edge function) ------------------
+// ---- Public entry point #1: live full data (edge function + build) ---------
 
 /**
- * The live-refreshed subset. Token + username are PARAMS so this runs on the
- * Cloudflare edge (with the edge's env) as well as at build. No token, or any
- * thrown error from a helper, collapses to mock with live:false — the page
- * never breaks because GitHub hiccuped.
+ * The FULL live payload — projects, langs, AND activity. Token + username are
+ * PARAMS so this runs on the Cloudflare edge (edge env) as well as at build.
+ * No token, or any helper throwing, collapses to mock with live:false so the
+ * page never breaks. This is the single fetcher both the endpoint and the
+ * build-time getGitHubData() share.
  */
-export async function fetchLiveActivity(
+export async function fetchLiveData(
   token: string,
   username: string = GITHUB_USERNAME,
-): Promise<ActivityData> {
+): Promise<GitHubData> {
   const fetchedAt = new Date().toISOString();
-  if (!token) return { ...mockActivity(), fetchedAt, live: false };
+  if (!token) return { ...mockData(), fetchedAt, live: false };
 
   try {
-    // Both calls in parallel — independent requests, so don't await serially.
-    const [commits, contrib] = await Promise.all([
+    // Four independent requests in parallel.
+    const [projects, langs, commits, contrib] = await Promise.all([
+      fetchProjects(token, username),
+      fetchLanguages(token, username),
       fetchCommits(token, username),
       fetchContributions(token, username),
-    ]);
-    return {
-      fetchedAt,
-      live: true,
-      totalContributions: contrib.total,
-      currentStreak: contrib.current,
-      longestStreak: contrib.longest,
-      prsMerged: contrib.prsMerged,
-      cells: contrib.cells,
-      commits,
-    };
-  } catch (err) {
-    console.warn('[github] live activity fetch failed, using mock:', err);
-    return { ...mockActivity(), fetchedAt, live: false };
-  }
-}
-
-// ---- Public entry point #2: full build-time payload ------------------------
-
-/**
- * Activity + the baked projects/langs. Called from Projects.astro and
- * GitHub.astro frontmatter to render the server HTML — the first paint and the
- * island's initial props. Uses the module-level build TOKEN (no params needed
- * here; this only ever runs at build).
- */
-export async function getGitHubData(): Promise<GitHubData> {
-  const fetchedAt = new Date().toISOString();
-  if (!TOKEN) return { ...mockData(), fetchedAt, live: false };
-
-  try {
-    const [projects, langs, commits, contrib] = await Promise.all([
-      fetchProjects(TOKEN, GITHUB_USERNAME),
-      fetchLanguages(TOKEN, GITHUB_USERNAME),
-      fetchCommits(TOKEN, GITHUB_USERNAME),
-      fetchContributions(TOKEN, GITHUB_USERNAME),
     ]);
     return {
       fetchedAt,
@@ -447,7 +408,18 @@ export async function getGitHubData(): Promise<GitHubData> {
       projects,
     };
   } catch (err) {
-    console.warn('[github] build fetch failed, falling back to mock:', err);
+    console.warn('[github] live fetch failed, using mock:', err);
     return { ...mockData(), fetchedAt, live: false };
   }
+}
+
+// ---- Public entry point #2: full build-time payload ------------------------
+
+/**
+ * Build-time convenience wrapper around fetchLiveData using the module TOKEN.
+ * Called from Projects.astro and GitHub.astro frontmatter for the server-
+ * rendered first paint (and the islands' initial props).
+ */
+export async function getGitHubData(): Promise<GitHubData> {
+  return fetchLiveData(TOKEN, GITHUB_USERNAME);
 }

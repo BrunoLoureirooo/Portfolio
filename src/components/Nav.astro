@@ -7,6 +7,10 @@
 // offset by the sticky chrome's height so targets don't hide under it.
 // Tabs whose section isn't built yet fall through to default behavior.
 import LangToggle from './LangToggle.astro';
+import { cvPath } from '../lib/cv';
+
+// Picks /CV.pdf or /CV_PT.pdf based on the current route's locale.
+const cvHref = cvPath(Astro.currentLocale);
 
 const tabs = [
   { label: 'about', href: '#about' },
@@ -18,7 +22,7 @@ const tabs = [
 ---
 
 <nav class="nav" aria-label="Primary">
-  <a class="nav__cv" href="/cv.pdf" download>
+  <a class="nav__cv" href={cvHref} download>
     <span class="nav__cv-cmd">$ wget cv.pdf</span>
     <span class="nav__cv-arrow" aria-hidden="true">↓</span>
   </a>

@@ -1,23 +1,21 @@
 ---
-// About — short, declarative bio. Two tight paragraphs; prose is sans for
-// readability (mono is reserved for terminal cues). Placeholder copy — keep
-// it confident and specific when you replace it.
+// About — the bio, sourced from the CV's Summary at build time (getCvContent,
+// locale-aware). Falls back to a static line if the CV can't be parsed.
+// NOTE: a CV Summary is third-person; that voice carries through to here. To
+// read first-person on the site, write the CV summary in first person — it's
+// the single source.
 import Section from './Section.astro';
+import { getCvContent } from '../lib/cvContent';
+
+const { summary } = await getCvContent(Astro.currentLocale);
+const bio =
+  summary ||
+  'Software engineer focused on backend systems — secure, production-ready services built to stay correct under load.';
 ---
 
 <Section id="about" title="About" cmd="cat about.md">
   <div class="about">
-    <p>
-      I'm a software developer focused on backend systems — the services, data
-      models, and integrations that sit behind a product and have to stay
-      correct under load. I care about boundaries that are easy to reason about
-      and code that the next person can change without fear.
-    </p>
-    <p>
-      My core stack is .NET and C#. I'm currently extending into the JVM with
-      Java and Spring Boot, because understanding a second mature ecosystem
-      makes me sharper in the first one.
-    </p>
+    <p>{bio}</p>
   </div>
 </Section>
 

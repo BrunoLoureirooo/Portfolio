@@ -10,6 +10,11 @@
 // PHASE 2 TODO: the neofetch "Langs" line + activity could hydrate from the
 // GitHub API. This static markup stays the fallback — keep it stable.
 
+import { cvPath } from '../lib/cv';
+
+// Picks /CV.pdf or /CV_PT.pdf based on the current route's locale.
+const cvHref = cvPath(Astro.currentLocale);
+
 // Neofetch key/value rows. Hardcoded in Phase 1 (see docs/CONTENT_ARCH.md).
 const info = [
   { k: 'OS', v: 'Arch Linux x86_64' },
@@ -70,7 +75,7 @@ const info = [
         <a class="pill" href="mailto:bloureiro2004@gmail.com">↳ email</a>
       </li>
       <li>
-        <a class="pill pill--amber" href="/cv.pdf" download>resume.pdf ↓</a>
+        <a class="pill pill--amber" href={cvHref} download>resume.pdf ↓</a>
       </li>
     </ul>
   </div>

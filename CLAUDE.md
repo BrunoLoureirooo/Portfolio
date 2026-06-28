@@ -13,12 +13,14 @@ This is a learning project. **Always make small, single-purpose edits, each imme
 ## Commands
 
 ```bash
-pnpm dev                    # dev server (foreground)
-pnpm astro dev --background # dev server (background) — stop with: pnpm astro dev stop
+pnpm start        # PRIMARY: build + serve LIVE (wrangler runs the edge Function) → :8788
+pnpm dev          # fast HMR for UI work — no /api/activity Function, so the island shows build-time data only
 pnpm build        # static build (output: 'static')
-pnpm preview      # preview build
+pnpm preview      # preview the static build (no Functions)
 pnpm astro check  # type-check
 ```
+
+`pnpm start` is the real local run: it executes `functions/api/activity.ts` (needs `.dev.vars`), so the live polling works. `pnpm dev` is mock-ish (no edge runtime). See [docs/features/github-data.md](docs/features/github-data.md).
 
 ## Stack (non-negotiable)
 
