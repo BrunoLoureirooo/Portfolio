@@ -9,9 +9,12 @@ important screen. Answers *who is this* before any scroll.
 2. Prompt line: `bruno@portfolio` (green) · `:~$` (amber marks) · `whoami` (fg).
 3. Big green **glowing** name (`--text-hero`, weight 700, `--glow-green`).
 4. **Typewriter tagline** in amber, blinking block caret (the section's one caret).
-5. **Neofetch panel** — bordered, faint green wash. Left: square box with glowing
-   green initials. Right: key/value list (green keys) — OS, Role, Uptime, Shell,
-   Location, Langs, Status (`● available for hire`, `--status-available`).
+5. **Neofetch panel** — bordered, faint green wash. Left: square box (green
+   hairline border, `--green-line`) with glowing green initials. Right: a
+   `bruno@portfolio` title line over a green separator rule (real-neofetch
+   convention), then a key/value list with green keys and a dim aligned colon
+   column — OS, Role, Uptime, Shell, Location, Langs, then a blank line and
+   Status (`● available for hire`, `--status-available`).
 6. **Quick links** row — bordered pills: `~/github`, `↳ email` (green hover glow),
    `resume.pdf ↓` (amber, real download).
 

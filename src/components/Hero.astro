@@ -54,22 +54,26 @@ const info = [
 
     <div class="neofetch">
       <div class="neofetch__logo" aria-hidden="true">BL</div>
-      <dl class="neofetch__info">
-        {
-          info.map((row) => (
-            <div class="neofetch__row">
-              <dt>{t(row.k)}</dt>
-              <dd>{t(row.v)}</dd>
-            </div>
-          ))
-        }
-        <div class="neofetch__row neofetch__row--status">
-          <dt>{t('hero.nf.status')}</dt>
-          <dd>
-            <span class="neofetch__dot" aria-hidden="true"></span>{t('hero.nf.status.value')}
-          </dd>
-        </div>
-      </dl>
+      <div class="neofetch__body">
+        {/* neofetch's title line: user@host + a separator rule, like the real tool */}
+        <p class="neofetch__host">bruno@portfolio</p>
+        <dl class="neofetch__info">
+          {
+            info.map((row) => (
+              <div class="neofetch__row">
+                <dt>{t(row.k)}</dt>
+                <dd>{t(row.v)}</dd>
+              </div>
+            ))
+          }
+          <div class="neofetch__row neofetch__row--status">
+            <dt>{t('hero.nf.status')}</dt>
+            <dd>
+              <span class="neofetch__dot" aria-hidden="true"></span>{t('hero.nf.status.value')}
+            </dd>
+          </div>
+        </dl>
+      </div>
     </div>
 
     <ul class="hero__links">
@@ -204,8 +208,7 @@ const info = [
     display: flex;
     flex-wrap: wrap;
     align-items: center;
-    gap: var(--space-6);
-    max-width: 560px;
+    gap: var(--space-10);
     margin-bottom: var(--space-8);
     padding: var(--space-5);
     border: 1px solid var(--border);
@@ -217,21 +220,38 @@ const info = [
     flex: none;
     display: grid;
     place-items: center;
-    width: 92px;
-    height: 92px;
-    border: 1px solid var(--border);
+    width: 116px;
+    height: 116px;
+    border: 1px solid var(--green-line);
     border-radius: var(--radius-sm);
-    font-size: var(--text-2xl);
+    /* One-off display glyph: larger than the 2xl scale so the initials fill
+       the box the way neofetch's ASCII logo does. */
+    font-size: 2.25rem;
     font-weight: var(--weight-bold);
     letter-spacing: 0.05em;
     color: var(--green);
     text-shadow: var(--glow-green);
   }
 
-  .neofetch__info {
+  .neofetch__body {
     flex: 1 1 240px;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* neofetch title line: dim user@host with a green hairline beneath it. */
+  .neofetch__host {
+    width: fit-content;
+    margin-bottom: var(--space-3);
+    padding-bottom: var(--space-2);
+    font-size: var(--text-sm);
+    color: var(--muted);
+    border-bottom: 1px solid var(--green-line);
+  }
+
+  .neofetch__info {
     display: grid;
-    gap: var(--space-1);
+    gap: var(--space-2);
     font-size: var(--text-sm);
   }
   .neofetch__row {
@@ -245,17 +265,28 @@ const info = [
   .neofetch__row dd {
     color: var(--fg);
   }
+  /* Colon separator pinned to the value-column start, so colons align down
+     the list regardless of label width — the neofetch `label : value` look. */
+  .neofetch__row dd::before {
+    content: ':';
+    margin-right: 0.6em;
+    color: var(--dim);
+  }
+  /* Blank line before Status — neofetch sets the status/uptime block apart. */
+  .neofetch__row--status {
+    margin-top: var(--space-3);
+  }
   .neofetch__row--status dd {
     color: var(--status-available);
-    display: flex;
-    align-items: center;
-    gap: var(--space-2);
   }
   .neofetch__dot {
+    display: inline-block;
     width: 0.55em;
     height: 0.55em;
+    margin-right: 0.5em;
     border-radius: var(--radius-full);
     background-color: var(--status-available);
+    vertical-align: middle;
   }
 
   /* ---- Quick links ---- */

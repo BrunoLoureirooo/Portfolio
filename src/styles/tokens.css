@@ -29,6 +29,9 @@
 
   /* Green at low alpha — chip fills, neofetch panel wash */
   --green-dim: rgba(0, 255, 0, 0.10);
+  /* Dim green hairline — visible-but-quiet green rules (neofetch logo border,
+     header separator). Brighter than --border, softer than --green. */
+  --green-line: rgba(0, 255, 0, 0.22);
 
   /* Legacy aliases — existing components still reference --text / --surface.
      Point at the new tokens to avoid breakage until they're re-skinned. */
