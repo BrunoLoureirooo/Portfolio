@@ -1,16 +1,19 @@
 # Design
 
-Canonical visual system for the portfolio. Tokens here are the single source of truth, implemented in [src/styles/tokens.css](src/styles/tokens.css). Colors and chrome are committed by the brief (non-negotiable) — identity preserved, not re-derived.
+Canonical visual system for the portfolio. Tokens here are the single source of truth, implemented in [src/styles/tokens.css](src/styles/tokens.css). Colors and chrome are committed by the brief (non-negotiable) — identity preserved, not re-derived. Section numbers (`§n`) are stable anchors referenced from [docs/features/audience-views.md](docs/features/audience-views.md).
 
-> **Direction change (2026-06-25):** this supersedes the earlier "restrained, no-CRT" system. The portfolio is now a full **terminal-window** treatment — green-on-black phosphor, one amber accent, CRT atmosphere on by default. PRODUCT.md, CLAUDE.md, and tokens.css have been reconciled; see [Implementation follow-ups](#reconciled--implementation-follow-ups) for what still rides the old semantics.
+> **Direction change (2026-06-25):** terminal-window treatment — green-on-black phosphor, one amber accent, CRT on by default. Superseded the earlier "restrained, no-CRT" system.
+>
+> **v2 (2026-07-01):** adds the **two-audience** layer. The same terminal serves two **programs** — *recruiter* (the v1 content) and *client* (outcome-first freelance) — chosen at an in-terminal entry moment and swapped by a single attribute. The v1 visual system below is unchanged and becomes the recruiter program; v2 adds the entry moment (§4), switch affordance (§5), client program (§7), program-aware chrome (§3), and the program-switch motion (§8). Identity (name, contact) comes from the CV, not hard-coded strings.
 
-## Concept & tone
+## §1 — Concept & tone
 
 - **Metaphor:** the whole page is one terminal window. Every section is introduced by a shell command (`$ cat about.md`) and its "output" is the content.
-- **Voice:** dry, confident, engineer-to-engineer. Comments use `#`. No marketing fluff. Easter-egg-friendly (`whoami`, `sudo hire-me`).
-- **Not** a working REPL — terminal *styling* over a real scrolling site. Sticky nav, normal scroll, no required user typing.
+- **Voice:** dry, confident, engineer-to-engineer. Comments use `#`. No marketing fluff.
+- **Not** a working REPL — terminal *styling* over a real scrolling site. Sticky nav, normal scroll, no required typing.
+- **Two audiences, one page (v2):** recruiters want technical depth; freelance clients want outcomes. They get opposite content via a **content switch, not navigation** — no router, no separate URLs. Both programs live in the static HTML; one shows at a time. The two are never merged.
 
-## Color
+## §2 — Color & typography
 
 Dark phosphor. sRGB hex, committed by brief. Green is the hero; amber is a sparing second accent only. No other hues.
 
@@ -22,122 +25,106 @@ Dark phosphor. sRGB hex, committed by brief. Green is the hero; amber is a spari
 | `--border` | `#1b291b` | Hairline borders |
 | `--green` | `#00ff00` | Primary: prompts, headings, key accents (the star) |
 | `--fg` | `#b9f3c0` | Body text (soft, readable green) |
-| `--muted` | `#5f8f68` | Secondary text, labels |
-| `--dim` | `#3a6a45` | Tertiary: timestamps, comments, file perms |
-| `--accent` | `#ffb000` | Amber — the ONE second color: `:~$` prompt marks, tags, CV button, section command prompts |
+| `--muted` | `#5f8f68` | Secondary text, labels (≈5.2:1 on `--panel`, AA body) |
+| `--dim` | `#56895f` | Tertiary: timestamps, comments, file perms (≈4.7:1 on `--panel`, AA body) |
+| `--accent` | `#ffb000` | Amber — the ONE second color: `:~$` marks, tags, CV button, section command prompts |
 
-**GitHub heatmap ramp** (GitHub's own greens, by intensity):
-
-| Level | Value |
-|-------|-------|
-| empty | `#0d1f14` |
-| 1 | `#0e4429` |
-| 2 | `#006d32` |
-| 3 | `#26a641` |
-| 4 (busiest) | `#39d353` |
+**GitHub heatmap ramp** (GitHub's own greens): empty `#0d1f14` · 1 `#0e4429` · 2 `#006d32` · 3 `#26a641` · 4 `#39d353`.
 
 Rules:
-- Green is the hero; amber is sparing accent **only** (`:~$` marks, tags, CV button, section command prompts). No third hue.
+- Green is the hero; amber is sparing accent **only**. No third hue.
 - Selection highlight = green bg / near-black text.
-- Green text-glow `text-shadow: 0 0 8px rgba(0,255,0,.45)` on **bright-green headings and prompts only** — not body text.
-- `--status-available: #39d353` — the bright-green `● available for hire` line (heatmap level-4 green).
+- Green text-glow `--glow-green` on **bright-green headings and prompts only** — never body.
+- `--status-available: #39d353` — the bright-green `● available for hire` line.
 
-## Typography
+**One font, everywhere:** `JetBrains Mono` (400 / 500 / 700), fallback `ui-monospace, "SF Mono", Menlo, monospace`. This is a *literal* terminal, so single-mono is identity, not costume. Base body 14px, line-height ~1.65. Hero name `clamp(34px, 7vw, 68px)`, weight 700. Tabular numbers on the clock and all stats. `text-wrap: balance` on display headings.
 
-**One font, everywhere:** `JetBrains Mono` (Google Fonts), weights 400 / 500 / 700. Fallback `ui-monospace, "SF Mono", Menlo, monospace`. This is a deliberate reversal of the old mono/sans split — terminal authenticity requires single-font.
+## §3 — Shared chrome + program-aware path
 
-- Base body **14px**, line-height ~1.65.
-- Hero name `clamp(34px, 7vw, 68px)`, weight 700, letter-spacing 1px.
-- **Tabular numbers** (`font-variant-numeric: tabular-nums`) on the live clock and all stats.
+Centered terminal window: `max-width: 1080px`, 1px border, 10px radius, soft green outer glow.
 
-## Layout / chrome
+1. **Title bar** (sticky): three traffic-light dots, centered title, right side `UTF-8` + **live ticking clock** (HH:MM:SS).
+   - **Program-aware path:** the title's path segment reflects the active program — `~` (entry moment) · `~/dev` (recruiter) · `~/studio` (client). The controller swaps just that segment (`#tb-path`) on load + on every switch.
+2. **Nav bar** (sticky, below title): left = amber `$ wget cv.pdf ↓` (real download). Right = section tabs (program-specific, §6/§7), the **switch pill** (§5), and the language toggle.
+3. **Content:** ~64px vertical rhythm, horizontal padding `clamp(18px, 4vw, 46px)`.
 
-Centered terminal window: `max-width: 1080px`, 1px border, 10px radius, soft green outer glow. Top-to-bottom:
+**Section heading = prompt line:** `bruno@portfolio` (muted) + `:~$` (amber) + the command (bright green, glow).
 
-1. **Title bar** (sticky, `top:0`): three macOS traffic-light dots (`#ff5f56` `#ffbd2e` `#27c93f`), centered title `visitor@portfolio: ~/dev — zsh — 132×40`, right side `UTF-8` + **live ticking clock** (HH:MM:SS, updates every second).
-2. **Nav + CV bar** (sticky, just below title bar): **left** = amber download button styled `$ wget cv.pdf ↓` (real `<a download>`). **right** = nav tabs `about · projects · experience · skills · github` as bordered pills; hover turns text + border amber.
-3. **Content**: ~64px vertical rhythm between sections, horizontal padding `clamp(18px, 4vw, 46px)`.
+**State model (v2):** a single attribute `data-view` on `<html>` gates everything — `ask` | `recruiter` | `client` — persisted in `localStorage.tp_view`. Both programs ship in the static HTML, each in a `[data-view-content]` wrapper; CSS shows exactly one (no fetch, no re-render). A blocking `<head>` script sets `data-view` **before first paint** (no selector flash). With JS off / for crawlers the attribute is unset → CSS defaults to the **recruiter** program (real content, never a dead selector).
 
-**Section heading = prompt line:** `visitor@portfolio` (muted) + `:~$` (amber) + the command (bright green, glow). E.g. `cat about.md`, `ls -la ~/projects`, `git log --author=alex --all`, `cat ~/.config/skills.toml`, `gh activity --live`.
+## §4 — Entry moment
 
-## Sections (in order)
+Shown when `data-view='ask'` (first visit, or `startView` pinned to `ask`). **Not a modal** — an in-terminal boot/`whoami` sequence: the title bar + clock stay visible, nav hidden. Dim `Last login` → `whoami` prompt → big green glowing **"Hi, I'm Bruno"** → one-line positioning sentence → `./welcome.sh --select-audience` with a blinking caret → two real `<button>` cards:
 
-### Hero (`#hero`)
-- Dim line: `Last login: Wed Jun 25 14:08:21 on ttys001`.
-- Prompt: `visitor@portfolio:~$ whoami`.
-- **Big green glowing name.**
-- **Typewriter tagline** in amber, types char-by-char on load (~42ms/char), blinking block caret.
-- **Neofetch panel** (bordered, faint green wash): left = square box with big glowing green initials; right = key/value list, green keys — `OS`, `Role`, `Uptime`, `Shell`, `Location`, `Langs`, `Status: ● available for hire` (last line in `--status-available`).
-- **Quick links** row: bordered pills — `~/github`, `↳ email` (green hover glow), `resume.pdf ↓` (amber, real download).
+- **▸ recruiter** — green-leaning, footer chip `$ open ~/dev`.
+- **▸ client** — amber-leaning, footer chip `$ open ~/studio`.
 
-### About (`#about`)
-`$ cat about.md` → 3 short paragraphs, max-width ~760px. First line opens with an amber `#` comment.
+Card tints telegraph the two worlds before entry. Choosing one persists `tp_view`, scrolls to top, moves focus into the chosen program, and restarts that program's typewriter. Cards carry a visible per-card focus ring (green / amber).
 
-### Projects (`#projects`)
-`$ ls -la ~/projects` → card grid `repeat(auto-fill, minmax(290px,1fr))`, 16px gap. Each card:
-- Header: `▸ project-name` (green bold) + status pill (`● active` green / `○ stable` muted).
-- One-line description (muted).
-- Tech tags: small amber-bordered chips.
-- Footer links: `git:repo →`, optional `↗ live`, dim `★ <stars>`.
-- Hover: border → green, slight lift, green glow.
+## §5 — Switch affordance
 
-### Experience (`#experience`)
-`$ git log --author=alex --all` → vertical timeline (left border + dot nodes; newest dot bright green w/ glow, older dim). Each entry: amber `[ 2023 — present ]`, green bold `Role @ Company`, 2–3 bullets, dim tech-stack line.
+Always in the nav after the section tabs: a **dashed-border pill** (distinct from the solid section tabs) — `→ client` (amber) on the recruiter program, `→ recruiter` (green) on the client program. Both render; CSS shows the one that flips to the *other* program. Same swap behavior as the entry cards. Lets a curious recruiter peek at the freelance side and vice versa.
 
-### Skills (`#skills`)
-`$ cat ~/.config/skills.toml` → card grid. Card titles as TOML sections in amber: `[languages]`, `[data & messaging]`, `[infra & tooling]`, `[practices]`. Inside: green chips, faint green fill.
+## §6 — Recruiter program (the v1 content — preserve)
 
-### GitHub (`#github`) — activity layer
-`$ gh activity --live` + dim comment `# streams from the GitHub API — drop in your token to go live`. **Currently mocked**; this is the real-API plug-in point (contributions, recent commits, top languages).
-- **Stat cards** (auto-fit, `minmax(150px)`): big green numbers — contributions/12mo, current streak, longest streak, PRs merged.
-- **Contribution heatmap:** caption `N contributions in the last year`. 53-week × 7-day CSS grid (7 rows, `grid-auto-flow:column`, 12px cells, 3px gap, 2px radius), colored by heatmap ramp. `Less ▢▢▢▢▢ More` legend below. Horizontally scrollable on narrow screens.
-- **Two panels** (auto-fit, `minmax(290px)`):
-  - `$ git log --oneline -6` → 6 recent commits: amber short-hash, green repo name, right-aligned dim meta (`2h · +214 −38`), message on next line.
-  - `$ gh api /langs` → language bars: label + %, thin track, green gradient fill (`#006d32 → #39d353`) with green glow.
+Rendered in `[data-view-content="recruiter"]`. The default program; v1 unchanged. Sections in order, each a prompt-line heading:
 
-### Footer
-`visitor@portfolio:~$ exit` (green, blinking caret) → dim `Connection to <domain> closed.` → row of muted social links (`github`, `linkedin`, `x.com`, email) green on hover, right-aligned `© 2026 · built in vim, btw`.
+- **Hero** (`whoami`) — dim last-login, big green glowing name, **amber typewriter tagline** (~42ms/char, blinking block caret), neofetch panel (initials box + key/value list, `Status: ● available for hire`), quick-link pills.
+- **About** (`cat about.md`) — 3 short paragraphs, max-width ~760px, amber `#` opener.
+- **Projects** (`ls -la ~/projects`) — card grid; header `▸ name` + status pill, one-liner, amber tech chips, footer links; hover → green border + lift + glow.
+- **Experience** (`git log --author=bruno --all`) — vertical timeline; newest node bright green w/ glow, amber `[ 2023 — present ]`, green bold `Role @ Company`, bullets, dim stack line.
+- **Skills** (`cat ~/.config/skills.toml`) — card grid, TOML-section titles in amber, green chips. The learning stack gets the amber marker, no apology.
+- **GitHub** (`gh activity --live`) — stat cards (big green numbers), 53×7 contribution heatmap (GitHub ramp), recent-commits + top-languages panels. Live via the edge Function; mock fallback.
 
-## Motion & interactions
+Nav section tabs: `about · projects · experience · skills · github`.
 
-- **Nav scroll:** clicking a tab smooth-scrolls to section, offset for sticky bars (~122px). **Animate with a timer-based tween** (ease-out cubic, ~300–700ms) — do **not** rely on `scrollTo({behavior:'smooth'})` alone. Target = `el.getBoundingClientRect().top + scrollY − 122`, step toward it.
-- **Live clock:** title bar, updates every second.
-- **Typewriter:** hero tagline on load + blinking caret (CSS `blink` keyframes, `step-end`).
-- **Hover:** pills/cards gain green border + glow; amber elements brighten.
-- All transitions snappy (~150ms).
-- `prefers-reduced-motion: reduce` → no type-on (tagline shown in full), caret static, no CRT animation. Content never gated behind a transition.
+## §7 — Client program (outcome-first)
 
-## CRT mode (toggleable, ON by default)
+Rendered in `[data-view-content="client"]`. Guiding test for every section: *would a busy studio owner understand this in 5 seconds?* No engineering jargon. Five sections:
 
-Fixed full-viewport overlay, `pointer-events:none`, above content:
-- **Scanlines:** `repeating-linear-gradient(0deg, rgba(0,0,0,.16) 0 1px, transparent 1px 3px)`.
-- **Vignette:** radial gradient darkening corners.
-- **Drifting scan band:** ~140px faint green gradient bar, top→bottom on ~7s loop.
-- **Subtle flicker:** overlay opacity oscillates gently (~4s).
+1. **Pitch / hero** (`./pitch.sh`) — leads with the canonical **"I help [audience] [service] so they can [outcome]"** statement (big green, second clause flipped to `--fg` for emphasis), amber typewriter sub-line + caret. Two CTAs max: amber `$ book a 20-min call →` + green-hover `↳ see a sample build`.
+2. **Services** (`cat services.md`) — a tight set of **outcome cards** (not a feature grid), single booking theme, each a plain result with a small amber `↳ outcome` tag.
+3. **Work** (`ls -la ~/demos`) — the proof, **visual-first**. One repeatable, data-driven `SampleCard` from the `samples` collection (sorted best-first), seeded with the **Outcast concept demo only**. Media | details; big green **demo facts** (`60s · 24/7 · 0`), capability chips, dim founder-pricing close. Adding work later = drop a `.md` (grows into a grid).
+4. **About** (`whoami --client`) — short, client-centric "why me." Real background as trust language; honest that studio work is new. Optional FAQ toggle (planned).
+5. **Contact** (`./contact.sh`) — green-wash panel, two CTAs max: amber `$ book a 20-min call →` + green-hover `↳ email bruno` (email from the CV).
 
-Tasteful — atmosphere, not nausea. Suppressed under `prefers-reduced-motion`.
+Nav section tabs: `services · work · about · contact`.
 
-## Configurable options (toggles / props)
+> **Honesty rule (critical).** Bruno has **not shipped freelance work yet.** Nothing here may imply a delivered-client track record — no invented studio results, no "N studios shipped." Credibility comes from the real engineering background + an honest **first-client / founder-pricing** position. Samples are **concept demos**, never badged "live": the `samples` schema defaults `badge` to `concept demo` / `demo conceito`, and `facts` are **demo facts, not business results**.
 
-- `accent`: `amber` (default) | `cyan` `#22d3ee` | `magenta` `#ff4fd8` — swaps the single accent color.
-- `crt`: on/off (default **on**).
-- `available`: on/off — shows/hides `● available for hire`.
+**CTAs are capped at two per section everywhere.** Booking target is the `bookingUrl` config knob (Cal.com/Calendly when set), falling back to a pre-filled email so the CTA is never a dead anchor.
 
-## Accessibility
+## §8 — Motion & program-switch
 
-- Body `--fg #b9f3c0` on `--bg #0a0a0a` — high contrast, AA-safe. **Verify `--muted #5f8f68` and `--dim #3a6a45` against `--bg` and `--panel`** before shipping — these are the at-risk pairings; restrict `--dim` to non-essential text (timestamps, comments).
-- Real `<a>` / `<button>` elements; visible keyboard focus states on every interactive element.
-- Semantic HTML throughout. Responsive: grids collapse, heatmap scrolls horizontally, nav tabs wrap.
+- **Program switch:** flips `data-view`, scrolls to top, moves focus into the new program, and **restarts that program's typewriter** (each hero listens for the `view:changed` event). Instant attribute → CSS swap, no cross-fade.
+- **Nav scroll:** timer-based tween (ease-out cubic, ~300–700ms), offset for the sticky chrome — not `scrollTo` alone.
+- **Live clock:** title bar, every second.
+- **Typewriter:** recruiter tagline + client sub-line type on load and on (re)show; blinking block caret (`step-end`).
+- **Hover:** pills/cards gain green (or amber, client) border + glow; amber elements brighten. Snappy (~150ms).
+- All transitions ease out (quart/expo), no bounce. Content is never gated behind a transition (full text ships; type-on is enhancement).
+
+## §9 — CRT mode (toggleable, ON by default)
+
+Fixed full-viewport overlay, `pointer-events:none`, above content: scanlines, corner vignette, a ~140px green scan band drifting top→bottom (~7s), barely-there flicker (~4s). Tasteful — atmosphere, not nausea.
+
+## §10 — Accessibility & i18n
+
+- Body `--fg` on `--bg` is AA-safe; the at-risk `--muted` / `--dim` were verified (≈5.2:1 / ≈4.7:1 on `--panel`) — restrict `--dim` to non-essential text.
+- Real `<a>` / `<button>` elements; visible keyboard focus on every interactive element (incl. per-card rings on the entry selector). Focus is moved into the new program after a swap, never stranded.
+- Semantic HTML; responsive (grids collapse, heatmap scrolls, tabs wrap). Primary client CTAs are ≥44px touch targets.
+- `prefers-reduced-motion`: no type-on (full text shown), caret static, no CRT animation, no card lift.
+- **i18n:** `en` (default) + `pt` via Astro routing. UI chrome + fixed copy in [src/i18n/ui.ts](src/i18n/ui.ts) (EN canonical, PT mirror); the "I help" statement is one shared key. Samples are bilingual per entry (`{ en, pt }` frontmatter). CV-sourced personal data stays dynamic.
+
+## §11 — Configurable toggles
+
+One canonical home: [src/config.ts](src/config.ts) (+ tokens for color).
+
+- **`startView`** — `ask` (default) · `recruiter` · `client`. Pins a program (skips the selector) for previewing; otherwise `tp_view` decides.
+- **`bookingUrl`** — scheduling link for the client "book a call" CTA; `null` → pre-filled email fallback.
+- **`accent`** — `amber` (default) · `cyan` `#22d3ee` · `magenta` `#ff4fd8` — retints every amber element together, incl. client primary CTAs (via `--accent`). *(token-level; wiring planned.)*
+- **`crt`** — on/off (default on). *(planned.)*
+- **`available`** — on/off, shows/hides the recruiter `● available for hire` line. *(planned.)*
 
 ## Content note
 
-All copy is **realistic placeholder**, swappable. GitHub data is mocked — wire to the real GitHub API (contributions, events, languages) when ready. (See Phase 1 TODOs in [CLAUDE.md](CLAUDE.md).)
-
-## Reconciled & implementation follow-ups
-
-[PRODUCT.md](PRODUCT.md), [CLAUDE.md](CLAUDE.md), and [src/styles/tokens.css](src/styles/tokens.css) are now aligned with this direction. The following still ride the OLD token semantics — rework when building out sections:
-
-- **[src/styles/tokens.css](src/styles/tokens.css)** keeps `--accent` (now amber), `--accent-dim`, `--learning`, `--learning-dim`, and `--font-sans` (aliased to mono) defined only to avoid breaking existing components. Anything that used `--accent` expecting *green* must move to `--green`. The "currently learning" amber marker collides with amber-as-accent — give it a distinguishing treatment.
-- **[src/components/](src/components/)** (Hero, Section, Stack, About) and **[src/styles/global.css](src/styles/global.css)** style against the old palette/semantics — re-skin to the terminal system (green hero, amber accent, glow, prompt-line headings).
-- **[src/layouts/BaseLayout.astro](src/layouts/BaseLayout.astro)**: load JetBrains Mono (Google Fonts) — the system stack no longer satisfies the single-font rule.
-- **global.css**: selection highlight → green bg / near-black text; generic anchor color should not default to amber.
+All copy is realistic placeholder, swappable. GitHub data wires to the real API via the edge Function (mock fallback). Identity and contact come from the CV.

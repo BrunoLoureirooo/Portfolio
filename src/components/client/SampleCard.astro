@@ -1,0 +1,190 @@
+---
+// SampleCard — one repeatable case-study card, driven by the `samples`
+// collection. Visual-first (media | details). Picks the current locale from
+// each { en, pt } field. Honesty rule: badge is a concept-demo mark (amber
+// "◆ …"), never a green "live"; facts are demo facts, not business results.
+import { render } from 'astro:content';
+import type { CollectionEntry } from 'astro:content';
+
+interface Props {
+  entry: CollectionEntry<'samples'>;
+}
+
+const { entry } = Astro.props;
+const { data } = entry;
+const locale = Astro.currentLocale === 'pt' ? 'pt' : 'en';
+const hasMedia = data.media.length > 0;
+// Markdown body → the closing founder-pricing / "studio work is new" note.
+const { Content } = await render(entry);
+---
+
+<article class="sample">
+  <div class="sample__media">
+    {
+      hasMedia ? (
+        <img src={data.media[0]} alt={data.title[locale]} loading="lazy" />
+      ) : (
+        <span class="sample__media-empty" aria-hidden="true">▮ preview</span>
+      )
+    }
+  </div>
+
+  <div class="sample__body">
+    <h3 class="sample__title">
+      {data.title[locale]}
+      <span class="sample__badge">◆ {data.badge[locale]}</span>
+    </h3>
+
+    {data.subtitle && <p class="sample__subtitle">{data.subtitle[locale]}</p>}
+    <p class="sample__summary">{data.summary[locale]}</p>
+
+    {
+      data.facts.length > 0 && (
+        <ul class="sample__facts">
+          {data.facts.map((f) => (
+            <li>
+              <span class="sample__fact-value">{f.value}</span>
+              <span class="sample__fact-label">{f.label[locale]}</span>
+            </li>
+          ))}
+        </ul>
+      )
+    }
+
+    {
+      data.capabilities.length > 0 && (
+        <ul class="sample__chips">
+          {data.capabilities.map((c) => (
+            <li>{c[locale]}</li>
+          ))}
+        </ul>
+      )
+    }
+
+    {data.video && <a class="sample__video" href={data.video}>↳ watch walkthrough</a>}
+
+    <div class="sample__note"><Content /></div>
+  </div>
+</article>
+
+<style>
+  .sample {
+    display: grid;
+    grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
+    gap: var(--space-6);
+    padding: var(--space-5);
+    background-color: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+  }
+
+  .sample__media {
+    display: grid;
+    place-items: center;
+    min-height: 200px;
+    overflow: hidden;
+    background-color: var(--bg);
+    border: 1px dashed var(--border);
+    border-radius: var(--radius-sm);
+  }
+  .sample__media img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  .sample__media-empty {
+    color: var(--muted);
+  }
+
+  .sample__body {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+  }
+  .sample__title {
+    color: var(--green);
+    font-size: var(--text-xl);
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-3);
+  }
+  .sample__badge {
+    color: var(--accent);
+    font-size: var(--text-xs);
+    border: 1px solid var(--accent-ring);
+    background-color: var(--accent-dim);
+    border-radius: var(--radius-sm);
+    padding: var(--space-1) var(--space-2);
+  }
+  .sample__subtitle {
+    color: var(--muted);
+    font-size: var(--text-sm);
+  }
+  .sample__summary {
+    color: var(--fg);
+    line-height: var(--leading-normal);
+  }
+
+  /* Demo facts — big glowing green numbers, dim label beneath. */
+  .sample__facts {
+    list-style: none;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-6);
+    margin-block: var(--space-2);
+  }
+  .sample__facts li {
+    display: flex;
+    flex-direction: column;
+  }
+  .sample__fact-value {
+    color: var(--green);
+    font-size: var(--text-2xl);
+    font-weight: var(--weight-bold);
+    text-shadow: var(--glow-green);
+    font-variant-numeric: tabular-nums;
+  }
+  .sample__fact-label {
+    color: var(--dim);
+    font-size: var(--text-xs);
+  }
+
+  .sample__chips {
+    list-style: none;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+  }
+  .sample__chips li {
+    color: var(--green);
+    font-size: var(--text-xs);
+    border: 1px solid var(--green-line);
+    border-radius: var(--radius-sm);
+    padding: var(--space-1) var(--space-2);
+  }
+
+  .sample__video {
+    align-self: flex-start;
+    color: var(--accent);
+    font-size: var(--text-sm);
+    text-decoration: none;
+  }
+  .sample__video:hover {
+    text-decoration: underline;
+  }
+
+  .sample__note {
+    color: var(--dim);
+    font-size: var(--text-sm);
+    margin-top: var(--space-2);
+  }
+
+  @media (max-width: 640px) {
+    .sample {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

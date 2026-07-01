@@ -1,24 +1,10 @@
 ---
-// English home page (route: "/"). Composes the section components inside
-// BaseLayout. Sections get added one at a time as they're built.
+// English home page (route: "/"). Thin shell — composition lives in Home.astro
+// (shared with /pt/), which ships both audience programs in one static page.
 import BaseLayout from '../layouts/BaseLayout.astro';
-import Hero from '../components/Hero.astro';
-import About from '../components/About.astro';
-import Projects from '../components/Projects.astro';
-import Experience from '../components/Experience.astro';
-import Stack from '../components/Stack.astro';
-import GitHub from '../components/GitHub.astro';
-import Footer from '../components/Footer.astro';
+import Home from '../components/Home.astro';
 ---
 
 <BaseLayout>
-  <main>
-    <Hero />
-    <About />
-    <Projects />
-    <Experience />
-    <Stack />
-    <GitHub />
-  </main>
-  <Footer />
+  <Home />
 </BaseLayout>

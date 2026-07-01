@@ -9,9 +9,11 @@
 import '../styles/tokens.css';
 import '../styles/global.css';
 import Nav from '../components/Nav.astro';
+import EntryMoment from '../components/EntryMoment.astro';
 import SEO from '../components/SEO.astro';
 import Analytics from '../components/Analytics.astro';
 import { useTranslations } from '../i18n/utils';
+import { startView } from '../config';
 
 interface Props {
   title?: string;
@@ -26,13 +28,43 @@ const t = useTranslations(lang);
 // title/description default to the locale's dictionary values; a page can still
 // override per-page by passing the prop.
 const { title = t('meta.title'), description = t('meta.description') } = Astro.props;
+
+// Split the window title around its path token so the controller can swap just
+// that segment per program (~ / ~/dev / ~/studio). Default ~/dev = recruiter,
+// which is also what no-JS/crawlers see.
+const [titlePre, titlePost = ''] = t('chrome.title').split('~/dev');
 ---
 
 <!doctype html>
-<html lang={lang}>
+<html lang={lang} data-start-view={startView}>
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <!-- No-flash view selector. Runs BEFORE first paint so returning
+         visitors never see the audience-selector blink. Sets data-view on
+         <html>; CSS keys off it to show exactly one program. With JS off the
+         attribute stays unset → CSS default reveals the recruiter view (real
+         content for crawlers/no-JS), not a dead selector. -->
+    <script is:inline>
+      (function () {
+        var html = document.documentElement;
+        var start = html.dataset.startView; // 'ask' | 'recruiter' | 'client'
+        var view;
+        if (start === 'recruiter' || start === 'client') {
+          view = start; // pinned override always wins (for previewing)
+        } else {
+          try {
+            view = localStorage.getItem('tp_view');
+          } catch (e) {
+            /* storage blocked (private mode) — fall through to the selector */
+          }
+          if (view !== 'recruiter' && view !== 'client') view = 'ask';
+        }
+        html.dataset.view = view;
+      })();
+    </script>
+
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="generator" content={Astro.generator} />
     <SEO title={title} description={description} lang={lang} />
@@ -52,12 +84,17 @@ const { title = t('meta.title'), description = t('meta.description') } = Astro.p
       <!-- Sticky chrome: title bar + nav pin to the viewport as one block. -->
       <div class="chrome">
         <header class="titlebar">
-          <div class="titlebar__dots" aria-hidden="true">
-            <span class="dot dot--red"></span>
-            <span class="dot dot--yellow"></span>
-            <span class="dot dot--green"></span>
+          <div class="titlebar__dots">
+            <button
+              type="button"
+              class="dot dot--red"
+              data-set-view="ask"
+              aria-label={t('chrome.close')}
+              title={t('chrome.close')}></button>
+            <span class="dot dot--yellow" aria-hidden="true"></span>
+            <span class="dot dot--green" aria-hidden="true"></span>
           </div>
-          <p class="titlebar__title">{t('chrome.title')}</p>
+          <p class="titlebar__title">{titlePre}<span id="tb-path">~/dev</span>{titlePost}</p>
           <div class="titlebar__meta">
             <span class="titlebar__enc">UTF-8</span>
             <time class="titlebar__clock" id="clock" aria-label={t('chrome.clock')}
@@ -68,6 +105,10 @@ const { title = t('meta.title'), description = t('meta.description') } = Astro.p
 
         <Nav />
       </div>
+
+      <!-- Audience selector: visible only when data-view='ask'. Sits beside
+           the program content (the <slot/>); CSS shows exactly one. -->
+      <EntryMoment />
 
       <slot />
     </div>
@@ -93,6 +134,66 @@ const { title = t('meta.title'), description = t('meta.description') } = Astro.p
         tick();
         setInterval(tick, 1000);
       }
+    </script>
+
+    <script>
+      // View controller — the one "island" for v2 audience-gated views.
+      // Both programs' markup ships in the static HTML; this only flips an
+      // attribute, so swaps are instant (no fetch, no re-render).
+      //
+      // Delegated so it works for any current/future trigger: the entry-moment
+      // selector cards and the nav switch pill all carry `data-set-view`.
+      // Title-bar path segment, program-aware (DESIGN §3).
+      function viewPath(view: string | undefined) {
+        return view === 'client' ? '~/studio' : view === 'recruiter' ? '~/dev' : '~';
+      }
+      function syncPath(view: string | undefined) {
+        const el = document.getElementById('tb-path');
+        if (el) el.textContent = viewPath(view);
+      }
+      syncPath(document.documentElement.dataset.view); // sync to the booted view
+
+      function setView(view: string) {
+        // Red traffic-light dot → back to the audience selector ("close" the
+        // program). Forget the saved choice so a later reload also lands here.
+        if (view === 'ask') {
+          document.documentElement.dataset.view = 'ask';
+          syncPath('ask');
+          try {
+            localStorage.removeItem('tp_view');
+          } catch (e) {
+            /* storage blocked — nothing to clear */
+          }
+          window.scrollTo(0, 0);
+          return;
+        }
+        if (view !== 'recruiter' && view !== 'client') return;
+        document.documentElement.dataset.view = view;
+        syncPath(view);
+        try {
+          localStorage.setItem('tp_view', view);
+        } catch (e) {
+          /* storage blocked — selection just won't persist across visits */
+        }
+        window.scrollTo(0, 0); // each program reads top-down from its hero
+        // a11y: the clicked control just became display:none — move focus into
+        // the newly shown program so keyboard users aren't dropped to <body>.
+        const shown = document.querySelector(`[data-view-content="${view}"]`);
+        const heading = shown?.querySelector<HTMLElement>('h1, h2');
+        if (heading) {
+          heading.setAttribute('tabindex', '-1');
+          heading.focus({ preventScroll: true });
+        }
+        // Tell the active hero to retype its tagline for the new program.
+        document.dispatchEvent(new CustomEvent('view:changed', { detail: view }));
+      }
+
+      document.addEventListener('click', (e) => {
+        const trigger = (e.target as HTMLElement).closest('[data-set-view]');
+        if (!trigger) return;
+        e.preventDefault();
+        setView((trigger as HTMLElement).dataset.setView ?? '');
+      });
     </script>
   </body>
 </html>
@@ -163,6 +264,30 @@ const { title = t('meta.title'), description = t('meta.description') } = Astro.p
   }
   .dot--green {
     background-color: var(--dot-green);
+  }
+
+  /* The red dot is interactive: it closes the active program and returns to the
+     audience selector. Reset the native button chrome; keep the 12px circle. */
+  button.dot {
+    padding: 0;
+    border: none;
+    font: inherit;
+    cursor: pointer;
+    position: relative;
+    transition: filter var(--duration-base) var(--ease-out-quart);
+  }
+  /* Enlarge the tap/click area without changing the dot's visual size. */
+  button.dot::after {
+    content: '';
+    position: absolute;
+    inset: -7px;
+  }
+  button.dot:hover {
+    filter: brightness(1.3);
+  }
+  button.dot:focus-visible {
+    outline: 2px solid var(--green);
+    outline-offset: 3px;
   }
 
   .titlebar__title {

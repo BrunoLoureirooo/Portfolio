@@ -1,0 +1,53 @@
+---
+// ClientContact (#contact · ./contact.sh) — the explicit close, in a green-wash
+// panel. Two CTAs max: amber "book a call" (primary funnel) + green-hover email.
+// Email comes from the CV contact block (one source, like Hero/Footer).
+// PLACEHOLDER lead copy — finalized in step 4. Book-a-call URL is an open
+// decision (Cal.com/Calendly vs mailto) — placeholder href for now.
+import Section from '../Section.astro';
+import { getCvContent } from '../../lib/cvContent';
+import { bookingUrl } from '../../config';
+import { useTranslations } from '../../i18n/utils';
+
+const t = useTranslations(Astro.currentLocale);
+const { contact } = await getCvContent(Astro.currentLocale);
+
+// Real scheduling link if configured; otherwise a pre-filled email (no dead #).
+const bookHref =
+  bookingUrl ??
+  `mailto:${contact.email}?subject=${encodeURIComponent('20-min call')}`;
+---
+
+<Section
+  id="contact"
+  title={t('c.section.contact.title')}
+  cmd={t('c.section.contact.cmd')}
+>
+  <div class="contact-panel">
+    <p class="contact-panel__lead">{t('c.contact.lead')}</p>
+    <div class="contact-panel__ctas">
+      <a class="c-cta c-cta--primary" href={bookHref} data-cta="book">{t('c.cta.book')}</a>
+      <a class="c-cta c-cta--ghost" href={`mailto:${contact.email}`}>{t('c.cta.email')}</a>
+    </div>
+  </div>
+</Section>
+
+<style>
+  .contact-panel {
+    padding: var(--space-8) var(--space-6);
+    background-color: var(--green-dim);
+    border: 1px solid var(--green-line);
+    border-radius: var(--radius-md);
+  }
+  .contact-panel__lead {
+    color: var(--green);
+    font-size: var(--text-xl);
+    text-shadow: var(--glow-green);
+    margin-bottom: var(--space-6);
+  }
+  .contact-panel__ctas {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-3);
+  }
+</style>

@@ -1,0 +1,151 @@
+---
+// ClientHero (#c-hero · ./pitch.sh) — the client-view opener. Leads with the
+// reusable "I help [audience] [service] so they can [outcome]" statement: sells
+// the unlock, not the deliverable. Two CTAs max (DESIGN §7).
+//
+// PLACEHOLDER copy — finalized in step 4 and moved into i18n (src/i18n/ui.ts).
+// Honesty rule (DESIGN §7): claims NO delivered-client results.
+import { useTranslations } from '../../i18n/utils';
+
+const t = useTranslations(Astro.currentLocale);
+
+// The "I help" statement is one canonical string; split on the em-dash so the
+// second clause renders in --fg for emphasis (falls back to the whole line).
+const [ihelpLead, ihelpEm = ''] = t('c.ihelp')
+  .split('—')
+  .map((s) => s.trim());
+---
+
+<section class="c-hero" id="c-hero" aria-label="Pitch">
+  <div class="c-hero__inner">
+    <p class="c-hero__line">
+      <span class="c-hero__user">bruno@portfolio</span><span class="c-hero__mark"
+        >:~$</span
+      > <span class="c-hero__cmd">./pitch.sh</span>
+    </p>
+
+    <h1 class="c-hero__ihelp">
+      {ihelpLead}{ihelpEm && <Fragment> — <span class="c-hero__em">{ihelpEm}</span></Fragment>}
+    </h1>
+
+    <p class="c-hero__sub" data-typewriter>
+      <span class="c-hero__sub-text">{t('c.hero.sub')}</span><span
+        class="caret"
+        aria-hidden="true"></span>
+    </p>
+
+    <div class="c-hero__ctas">
+      <a class="c-cta c-cta--primary" href="#contact">{t('c.cta.book')}</a>
+      <a class="c-cta c-cta--ghost" href="#work">{t('c.cta.sample')}</a>
+    </div>
+  </div>
+</section>
+
+<style>
+  .c-hero {
+    padding: var(--space-16) clamp(18px, 4vw, 46px) var(--space-12);
+  }
+  .c-hero__inner {
+    max-width: var(--container);
+    margin-inline: auto;
+  }
+  .c-hero__line {
+    font-size: var(--text-base);
+  }
+  .c-hero__user {
+    color: var(--muted);
+  }
+  .c-hero__mark {
+    color: var(--accent);
+  }
+  .c-hero__cmd {
+    color: var(--green);
+  }
+
+  /* The "I help" statement — big green, one clause flipped to --fg for emphasis. */
+  .c-hero__ihelp {
+    margin-top: var(--space-5);
+    max-width: 22ch;
+    font-size: clamp(28px, 5.5vw, 52px);
+    font-weight: var(--weight-bold);
+    line-height: var(--leading-tight);
+    text-wrap: balance;
+    color: var(--green);
+    text-shadow: var(--glow-green);
+  }
+  .c-hero__em {
+    color: var(--fg);
+    text-shadow: none;
+  }
+
+  .c-hero__sub {
+    margin-top: var(--space-5);
+    color: var(--accent);
+    font-size: var(--text-lg);
+  }
+
+  .c-hero__ctas {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-3);
+    margin-top: var(--space-8);
+  }
+
+  /* Scoped caret — amber to match the sub-line it trails. */
+  .caret {
+    display: inline-block;
+    width: 0.55em;
+    height: 1.05em;
+    margin-left: 0.08em;
+    background-color: var(--accent);
+    vertical-align: text-bottom;
+    animation: c-hero-caret 1.06s step-end infinite;
+  }
+  @keyframes c-hero-caret {
+    0%,
+    50% {
+      opacity: 1;
+    }
+    50.01%,
+    100% {
+      opacity: 0;
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .caret {
+      animation: none;
+      opacity: 1;
+    }
+  }
+</style>
+
+<script>
+  // Typewriter for the amber sub-line — the caret implies typing, so type it.
+  // Full text already in the DOM (no-JS / reduced-motion keep it). Re-types when
+  // the client program is (re)shown via a view swap (DESIGN §8).
+  const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const el = document.querySelector<HTMLElement>(
+    '[data-typewriter] .c-hero__sub-text',
+  );
+
+  if (el && !reduce) {
+    const full = el.textContent ?? '';
+    const speed = 42; // matches the recruiter hero
+    let timer: number | undefined;
+    const run = () => {
+      window.clearTimeout(timer);
+      el.textContent = '';
+      let i = 0;
+      const type = () => {
+        i += 1;
+        el.textContent = full.slice(0, i);
+        if (i < full.length) timer = window.setTimeout(type, speed);
+      };
+      type();
+    };
+    run();
+    document.addEventListener('view:changed', (e) => {
+      if ((e as CustomEvent).detail === 'client') run();
+    });
+  }
+</script>

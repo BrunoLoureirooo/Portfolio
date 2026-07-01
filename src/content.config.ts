@@ -35,4 +35,32 @@ const extras = defineCollection({
   }),
 });
 
-export const collections = { experience, extras };
+// Portfolio samples (client-view case studies). Data-driven like experience/
+// extras: add an entry = drop a .md file. Bilingual by design — every prose
+// field is a localized { en, pt } object so a sample's two languages live in
+// one file and can't drift apart. Language-neutral data (image paths, fact
+// VALUES like "60s") stays a plain string.
+const localized = z.object({ en: z.string(), pt: z.string() });
+
+const samples = defineCollection({
+  loader: glob({ pattern: '**/*.md', base: './src/content/samples' }),
+  schema: z.object({
+    title: localized,
+    subtitle: localized.optional(),
+    // Honesty rule (DESIGN §7): the badge is NEVER "live". Defaults to a
+    // concept-demo label; samples represent what Bruno would build, not
+    // delivered client work.
+    badge: localized.default({ en: 'concept demo', pt: 'demo conceito' }),
+    summary: localized,
+    media: z.array(z.string()).default([]),   // committed paths under public/
+    video: z.string().optional(),             // optional <1-min walkthrough
+    // Demo facts, NOT business results (e.g. label "to book" / value "60s").
+    facts: z
+      .array(z.object({ label: localized, value: z.string() }))
+      .default([]),
+    capabilities: z.array(localized).default([]), // chips
+    order: z.number().default(0),                 // best first (ascending)
+  }),
+});
+
+export const collections = { experience, extras, samples };

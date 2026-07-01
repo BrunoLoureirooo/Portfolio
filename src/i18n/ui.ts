@@ -22,6 +22,14 @@ export const ui = {
     'nav.experience': 'experience',
     'nav.skills': 'skills',
     'nav.github': 'github',
+    // v2 switch pill — flips to the other program (label = the destination).
+    'nav.switch.client': '→ client',
+    'nav.switch.recruiter': '→ recruiter',
+    // Client-view section tabs (shown only on the client program).
+    'nav.c.services': 'services',
+    'nav.c.work': 'work',
+    'nav.c.about': 'about',
+    'nav.c.contact': 'contact',
 
     // Section headings: `.title` is the a11y label (translates); `.cmd` is the
     // shell command shown as the visible heading (same in every locale).
@@ -35,6 +43,57 @@ export const ui = {
     'section.skills.cmd': 'cat ~/.config/skills.toml',
     'section.github.title': 'GitHub activity',
     'section.github.cmd': 'gh activity --live',
+
+    // Entry moment (v2 audience selector). Shown when data-view='ask'. Terminal
+    // last-login + whoami lines reuse the hero keys; these are selector-only.
+    'entry.aria': 'Choose how to view this site',
+    'entry.greeting': "Hi, I'm Bruno",
+    'entry.positioning': 'Software developer. Two ways in — pick the one that fits you:',
+    'entry.cmd': './welcome.sh --select-audience',
+    'entry.recruiter.label': '▸ recruiter',
+    'entry.recruiter.desc': 'the engineering — .NET, microservices, live GitHub, deep-dives',
+    'entry.recruiter.chip': '$ open ~/dev',
+    'entry.client.label': '▸ client',
+    'entry.client.desc': 'the outcomes — online bookings, deposits, fewer no-shows',
+    'entry.client.chip': '$ open ~/studio',
+
+    // Client-view section headings (cmd = constant; title = a11y label).
+    'c.section.pitch.title': 'Pitch',
+    'c.section.pitch.cmd': './pitch.sh',
+    'c.section.services.title': 'Services',
+    'c.section.services.cmd': 'cat services.md',
+    'c.section.work.title': 'Work',
+    'c.section.work.cmd': 'ls -la ~/demos',
+    'c.section.about.title': 'About',
+    'c.section.about.cmd': 'whoami --client',
+    'c.section.contact.title': 'Contact',
+    'c.section.contact.cmd': './contact.sh',
+
+    // Client-view copy. The "I help" statement is the ONE canonical key — reused
+    // verbatim in the hero, the Instagram bio, and cold-outreach DMs. The hero
+    // splits it on the em-dash to flip the second clause to --fg for emphasis.
+    'c.ihelp':
+      'I help studios take bookings and deposits online — so you stop chasing no-shows and get paid up front.',
+    'c.hero.sub': 'Online booking, deposits, reminders — on a site that looks like you.',
+    // Client CTAs (capped at two per section). Shared by hero + contact.
+    'c.cta.book': '$ book a 20-min call →',
+    'c.cta.sample': '↳ see a sample build',
+    'c.cta.email': '↳ email bruno',
+    // Services — outcome cards (the "what"), single booking theme.
+    'c.svc.tag': '↳ outcome',
+    'c.svc.calendar': 'Your calendar fills itself',
+    'c.svc.noshows': 'No-shows stop hurting',
+    'c.svc.reminders': 'Reminders that actually land',
+    'c.svc.site': 'A site that looks like you',
+    // Work / about / contact prose.
+    'c.work.note': '# concept demo — what I’d build for you, not a delivered result',
+    'c.about.note': '# why me',
+    'c.about.lead':
+      'Direct, 1:1 — no agency layers. First studios get founder pricing. Studio work is new; the engineering behind it isn’t.',
+    'c.about.trust.direct': '1:1 direct',
+    'c.about.trust.pricing': 'founder pricing',
+    'c.about.trust.background': 'payments and scheduling background',
+    'c.contact.lead': 'Ready when you are — let’s talk about your studio.',
 
     // Hero. Terminal-flavor lines (lastlogin/cmd) and the name stay constant;
     // neofetch labels + technical values are program output (kept as-is); only
@@ -110,6 +169,7 @@ export const ui = {
     'meta.description': 'Software developer portfolio.',
     'chrome.title': 'bruno@portfolio: ~/dev — zsh — 132×40',
     'chrome.clock': 'Current time',
+    'chrome.close': 'Back to audience selection',
     'lang.aria': 'Language',
   },
   pt: {
@@ -119,6 +179,12 @@ export const ui = {
     'nav.experience': 'experiência',
     'nav.skills': 'competências',
     'nav.github': 'github',
+    'nav.switch.client': '→ cliente',
+    'nav.switch.recruiter': '→ recrutador',
+    'nav.c.services': 'serviços',
+    'nav.c.work': 'trabalho',
+    'nav.c.about': 'sobre',
+    'nav.c.contact': 'contacto',
 
     'section.about.title': 'Sobre',
     'section.about.cmd': 'cat about.md',
@@ -130,6 +196,48 @@ export const ui = {
     'section.skills.cmd': 'cat ~/.config/skills.toml',
     'section.github.title': 'Atividade GitHub',
     'section.github.cmd': 'gh activity --live',
+
+    'entry.aria': 'Escolhe como ver este site',
+    'entry.greeting': 'Olá, sou o Bruno',
+    'entry.positioning': 'Programador de software. Duas entradas — escolhe a que te encaixa:',
+    'entry.cmd': './welcome.sh --select-audience',
+    'entry.recruiter.label': '▸ recrutador',
+    'entry.recruiter.desc': 'a engenharia — .NET, microserviços, GitHub ao vivo, deep-dives',
+    'entry.recruiter.chip': '$ open ~/dev',
+    'entry.client.label': '▸ cliente',
+    'entry.client.desc': 'os resultados — marcações online, depósitos, menos faltas',
+    'entry.client.chip': '$ open ~/studio',
+
+    'c.section.pitch.title': 'Pitch',
+    'c.section.pitch.cmd': './pitch.sh',
+    'c.section.services.title': 'Serviços',
+    'c.section.services.cmd': 'cat services.md',
+    'c.section.work.title': 'Trabalho',
+    'c.section.work.cmd': 'ls -la ~/demos',
+    'c.section.about.title': 'Sobre',
+    'c.section.about.cmd': 'whoami --client',
+    'c.section.contact.title': 'Contacto',
+    'c.section.contact.cmd': './contact.sh',
+
+    'c.ihelp':
+      'Ajudo estúdios a aceitar marcações e depósitos online — para deixares de andar atrás de faltas e receberes adiantado.',
+    'c.hero.sub': 'Marcações, depósitos e lembretes — num site com a tua cara.',
+    'c.cta.book': '$ marca uma chamada de 20 min →',
+    'c.cta.sample': '↳ vê um exemplo',
+    'c.cta.email': '↳ envia email',
+    'c.svc.tag': '↳ resultado',
+    'c.svc.calendar': 'A agenda enche-se sozinha',
+    'c.svc.noshows': 'As faltas deixam de doer',
+    'c.svc.reminders': 'Lembretes que chegam mesmo',
+    'c.svc.site': 'Um site com a tua cara',
+    'c.work.note': '# demo conceito — o que eu construiria para ti, não um resultado entregue',
+    'c.about.note': '# porquê eu',
+    'c.about.lead':
+      'Direto, 1:1 — sem camadas de agência. Os primeiros estúdios têm preço de lançamento. O trabalho com estúdios é novo; a engenharia por trás não é.',
+    'c.about.trust.direct': '1:1 direto',
+    'c.about.trust.pricing': 'preço de lançamento',
+    'c.about.trust.background': 'experiência em pagamentos e agendamento',
+    'c.contact.lead': 'Estou pronto quando estiveres — vamos falar do teu estúdio.',
 
     'hero.lastlogin': 'Last login: Wed Jun 25 14:08:21 on ttys001',
     'hero.cmd': 'whoami',
@@ -195,6 +303,7 @@ export const ui = {
     'meta.description': 'Portefólio de programador de software.',
     'chrome.title': 'bruno@portfolio: ~/dev — zsh — 132×40',
     'chrome.clock': 'Hora atual',
+    'chrome.close': 'Voltar à seleção de público',
     'lang.aria': 'Idioma',
   },
 } as const;

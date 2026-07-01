@@ -1,0 +1,231 @@
+---
+// EntryMoment — the v2 audience selector. NOT a modal: an in-terminal
+// boot/whoami sequence shown when data-view='ask' (first visit, or startView
+// forced to 'ask'). The title bar + clock stay visible above; nav is hidden.
+//
+// The two cards are real <button>s carrying data-set-view; the global view
+// controller (BaseLayout) catches the click, persists tp_view, and swaps the
+// program. Card tints telegraph the two worlds: recruiter green, client amber.
+import { useTranslations } from '../i18n/utils';
+
+const t = useTranslations(Astro.currentLocale);
+---
+
+<section class="entry" aria-label={t('entry.aria')}>
+  <div class="entry__inner">
+    <p class="entry__lastlogin">{t('hero.lastlogin')}</p>
+
+    <p class="entry__line">
+      <span class="entry__user">bruno@portfolio</span><span class="entry__mark"
+        >:~$</span
+      > {t('hero.cmd')}
+    </p>
+
+    <h1 class="entry__greeting">{t('entry.greeting')}</h1>
+    <p class="entry__positioning">{t('entry.positioning')}</p>
+
+    <p class="entry__line">
+      <span class="entry__user">bruno@portfolio</span><span class="entry__mark"
+        >:~$</span
+      > <span class="entry__cmd">{t('entry.cmd')}</span><span
+        class="caret"
+        aria-hidden="true"></span>
+    </p>
+
+    <div class="entry__cards">
+      <button
+        type="button"
+        class="entry-card entry-card--recruiter"
+        data-set-view="recruiter"
+      >
+        <span class="entry-card__label">{t('entry.recruiter.label')}</span>
+        <span class="entry-card__desc">{t('entry.recruiter.desc')}</span>
+        <span class="entry-card__chip">{t('entry.recruiter.chip')}</span>
+      </button>
+
+      <button
+        type="button"
+        class="entry-card entry-card--client"
+        data-set-view="client"
+      >
+        <span class="entry-card__label">{t('entry.client.label')}</span>
+        <span class="entry-card__desc">{t('entry.client.desc')}</span>
+        <span class="entry-card__chip">{t('entry.client.chip')}</span>
+      </button>
+    </div>
+  </div>
+</section>
+
+<style>
+  .entry {
+    /* Fills the space below the sticky chrome so the selector reads as the
+       whole screen without forcing the page taller (no scroll on entry).
+       `display` is owned by global.css (data-view gating), not set here. */
+    min-height: 70vh;
+    align-items: center;
+    padding: var(--space-12) clamp(18px, 4vw, 46px);
+  }
+
+  .entry__inner {
+    width: 100%;
+    max-width: 760px;
+    margin: 0 auto;
+  }
+
+  .entry__lastlogin {
+    color: var(--dim);
+    font-size: var(--text-sm);
+  }
+
+  .entry__line {
+    font-size: var(--text-base);
+    margin-top: var(--space-3);
+  }
+
+  .entry__user {
+    color: var(--muted);
+  }
+  .entry__mark {
+    color: var(--accent);
+  }
+  .entry__cmd {
+    color: var(--green);
+  }
+
+  .entry__greeting {
+    margin-top: var(--space-5);
+    font-size: clamp(30px, 6vw, 56px);
+    font-weight: var(--weight-bold);
+    line-height: var(--leading-tight);
+    letter-spacing: 1px;
+    text-wrap: balance;
+    color: var(--green);
+    text-shadow: var(--glow-green);
+  }
+
+  .entry__positioning {
+    margin-top: var(--space-3);
+    color: var(--fg);
+    line-height: var(--leading-snug);
+    max-width: 52ch;
+  }
+
+  .entry__cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: var(--space-4);
+    margin-top: var(--space-8);
+  }
+
+  /* Real buttons styled as terminal cards. Text stays left-aligned. */
+  .entry-card {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+    text-align: left;
+    padding: var(--space-5);
+    background-color: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    font: inherit;
+    transition:
+      border-color var(--duration-base) var(--ease-out-quart),
+      box-shadow var(--duration-base) var(--ease-out-quart),
+      transform var(--duration-base) var(--ease-out-quart);
+  }
+
+  .entry-card:hover,
+  .entry-card:focus-visible {
+    transform: translateY(-2px);
+  }
+  /* Keep a visible focus ring (tinted per card) — don't rely on border+glow alone. */
+  .entry-card:focus-visible {
+    outline: 2px solid var(--green);
+    outline-offset: 2px;
+  }
+  .entry-card--client:focus-visible {
+    outline-color: var(--accent);
+  }
+
+  .entry-card__label {
+    font-size: var(--text-xl);
+    font-weight: var(--weight-bold);
+  }
+  .entry-card__desc {
+    color: var(--muted);
+    font-size: var(--text-sm);
+    line-height: var(--leading-snug);
+  }
+  .entry-card__chip {
+    margin-top: var(--space-2);
+    align-self: flex-start;
+    font-size: var(--text-xs);
+    padding: var(--space-1) var(--space-3);
+    border-radius: var(--radius-sm);
+  }
+
+  /* Recruiter = green-leaning. */
+  .entry-card--recruiter .entry-card__label {
+    color: var(--green);
+  }
+  .entry-card--recruiter .entry-card__chip {
+    color: var(--green);
+    background-color: var(--green-dim);
+    border: 1px solid var(--green-line);
+  }
+  .entry-card--recruiter:hover,
+  .entry-card--recruiter:focus-visible {
+    border-color: var(--green);
+    box-shadow: var(--glow-green);
+  }
+
+  /* Client = amber-leaning. */
+  .entry-card--client .entry-card__label {
+    color: var(--accent);
+  }
+  .entry-card--client .entry-card__chip {
+    color: var(--accent);
+    background-color: var(--accent-dim);
+    border: 1px solid var(--accent-ring);
+  }
+  .entry-card--client:hover,
+  .entry-card--client:focus-visible {
+    border-color: var(--accent);
+    box-shadow: 0 0 8px var(--accent-ring);
+  }
+
+  /* Block caret on the welcome.sh prompt — green, hard blink (terminal idiom). */
+  .caret {
+    display: inline-block;
+    width: 0.6em;
+    height: 1.05em;
+    margin-left: 0.08em;
+    background-color: var(--green);
+    vertical-align: text-bottom;
+    animation: entry-caret-blink 1.06s step-end infinite;
+  }
+
+  @keyframes entry-caret-blink {
+    0%,
+    50% {
+      opacity: 1;
+    }
+    50.01%,
+    100% {
+      opacity: 0;
+    }
+  }
+
+  /* Reduced motion: drop the lift, pin the caret solid. */
+  @media (prefers-reduced-motion: reduce) {
+    .entry-card:hover,
+    .entry-card:focus-visible {
+      transform: none;
+    }
+    .caret {
+      animation: none;
+      opacity: 1;
+    }
+  }
+</style>

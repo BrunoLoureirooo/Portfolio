@@ -1,0 +1,39 @@
+---
+// ClientWork (#work · ls -la ~/demos) — the proof, visual-first. Data-driven:
+// renders the `samples` collection sorted best-first, so growth is drop-in
+// (one card today, a grid as more land). Seeded with the Outcast concept demo
+// only. Honesty rule: concept demos, never delivered results.
+import Section from '../Section.astro';
+import SampleCard from './SampleCard.astro';
+import { getCollection } from 'astro:content';
+import { useTranslations } from '../../i18n/utils';
+
+const t = useTranslations(Astro.currentLocale);
+const samples = (await getCollection('samples')).sort(
+  (a, b) => a.data.order - b.data.order,
+);
+---
+
+<Section
+  id="work"
+  title={t('c.section.work.title')}
+  cmd={t('c.section.work.cmd')}
+>
+  <p class="work__note">{t('c.work.note')}</p>
+
+  <div class="work__list">
+    {samples.map((s) => <SampleCard entry={s} />)}
+  </div>
+</Section>
+
+<style>
+  .work__note {
+    color: var(--dim);
+    font-size: var(--text-sm);
+    margin-bottom: var(--space-5);
+  }
+  .work__list {
+    display: grid;
+    gap: var(--space-5);
+  }
+</style>

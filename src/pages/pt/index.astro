@@ -1,26 +1,11 @@
 ---
-// Portuguese home page (route: "/pt/"). Same composition as the EN page — the
-// components aren't forked; they read locale-aware strings from the i18n
-// dictionary (src/i18n/ui.ts) and personal data from the PT CV. So this file
-// stays a thin mirror of index.astro by design.
+// Portuguese home page (route: "/pt/"). Thin shell — same Home.astro as the EN
+// route; components read PT strings from the i18n dictionary and the PT CV, so
+// no composition is forked here.
 import BaseLayout from '../../layouts/BaseLayout.astro';
-import Hero from '../../components/Hero.astro';
-import About from '../../components/About.astro';
-import Projects from '../../components/Projects.astro';
-import Experience from '../../components/Experience.astro';
-import Stack from '../../components/Stack.astro';
-import GitHub from '../../components/GitHub.astro';
-import Footer from '../../components/Footer.astro';
+import Home from '../../components/Home.astro';
 ---
 
 <BaseLayout>
-  <main>
-    <Hero />
-    <About />
-    <Projects />
-    <Experience />
-    <Stack />
-    <GitHub />
-  </main>
-  <Footer />
+  <Home />
 </BaseLayout>

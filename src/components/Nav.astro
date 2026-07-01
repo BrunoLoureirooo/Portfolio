@@ -24,6 +24,15 @@ const tabs = [
   { key: 'nav.skills', href: '#stack' },
   { key: 'nav.github', href: '#github' },
 ] as const;
+
+// Client-view tabs — point at the client program's anchors. Shown only on the
+// client view (global.css gates each tablist by data-view).
+const clientTabs = [
+  { key: 'nav.c.services', href: '#services' },
+  { key: 'nav.c.work', href: '#work' },
+  { key: 'nav.c.about', href: '#c-about' },
+  { key: 'nav.c.contact', href: '#contact' },
+] as const;
 ---
 
 <nav class="nav" aria-label="Primary">
@@ -33,7 +42,7 @@ const tabs = [
   </a>
 
   <div class="nav__right">
-    <ul class="nav__tabs">
+    <ul class="nav__tabs nav__tabs--recruiter">
       {
         tabs.map((tab) => (
           <li>
@@ -44,6 +53,39 @@ const tabs = [
         ))
       }
     </ul>
+
+    <ul class="nav__tabs nav__tabs--client">
+      {
+        clientTabs.map((tab) => (
+          <li>
+            <a class="nav__tab" href={tab.href}>
+              {t(tab.key)}
+            </a>
+          </li>
+        ))
+      }
+    </ul>
+
+    <!-- v2 audience switch — a dashed pill (distinct from the solid section
+         tabs). Both render; global.css shows the one matching the active view.
+         Clicking swaps the program via the delegated controller. -->
+    <button
+      type="button"
+      class="nav__switch nav__switch--to-client"
+      data-set-view="client"
+      data-when-view="recruiter"
+    >
+      {t('nav.switch.client')}
+    </button>
+    <button
+      type="button"
+      class="nav__switch nav__switch--to-recruiter"
+      data-set-view="recruiter"
+      data-when-view="client"
+    >
+      {t('nav.switch.recruiter')}
+    </button>
+
     <LangToggle />
   </div>
 </nav>
@@ -97,9 +139,10 @@ const tabs = [
   .nav__tabs {
     list-style: none;
     padding: 0;
-    display: flex;
     flex-wrap: wrap;
     gap: var(--space-2);
+    /* `display` is owned by global.css so a data-view rule can hide the
+       recruiter tabs on the client view without a specificity fight. */
   }
 
   /* Bordered pills, muted at rest → amber text + border on hover/focus. */
@@ -123,14 +166,39 @@ const tabs = [
     text-decoration: none;
   }
 
-  /* On mobile the section tabs are dropped — the page is one scroll, so they
-     add clutter without much value. CV download + language toggle stay.
-     Same 640px cutoff the title bar uses. */
-  @media (max-width: 640px) {
-    .nav__tabs {
-      display: none;
-    }
+  /* v2 switch pill — dashed border sets it apart from the solid section tabs.
+     `display` is owned by global.css (shown per active view). */
+  .nav__switch {
+    font-size: var(--text-xs);
+    border: 1px dashed var(--border);
+    border-radius: var(--radius-full);
+    padding: var(--space-1) var(--space-3);
+    background: transparent;
+    font-family: inherit;
+    cursor: pointer;
+    transition:
+      color var(--duration-base) var(--ease-out-quart),
+      border-color var(--duration-base) var(--ease-out-quart);
   }
+
+  /* → client = amber (the freelance world); → recruiter = green (the dev world). */
+  .nav__switch--to-client {
+    color: var(--accent);
+  }
+  .nav__switch--to-client:hover,
+  .nav__switch--to-client:focus-visible {
+    border-color: var(--accent);
+  }
+  .nav__switch--to-recruiter {
+    color: var(--green);
+  }
+  .nav__switch--to-recruiter:hover,
+  .nav__switch--to-recruiter:focus-visible {
+    border-color: var(--green);
+  }
+
+  /* Tablist visibility (per-view + mobile) is owned by global.css so the two
+     programs' tabs gate cleanly without a cross-stylesheet specificity tie. */
 </style>
 
 <script>

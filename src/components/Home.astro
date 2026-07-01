@@ -1,0 +1,44 @@
+---
+// Home — shared page composition for BOTH routes (/ and /pt/). Components read
+// locale-aware strings themselves, so this single file serves both languages;
+// the route pages stay thin shells around it.
+//
+// Both programs ship in the static HTML, each in its own [data-view-content]
+// wrapper. CSS (global.css) shows exactly one based on <html data-view>; no
+// fetch, no re-render on switch. Footer is shared chassis (both programs).
+import Hero from './Hero.astro';
+import About from './About.astro';
+import Projects from './Projects.astro';
+import Experience from './Experience.astro';
+import Stack from './Stack.astro';
+import GitHub from './GitHub.astro';
+import Footer from './Footer.astro';
+import ClientHero from './client/ClientHero.astro';
+import ClientServices from './client/ClientServices.astro';
+import ClientWork from './client/ClientWork.astro';
+import ClientAbout from './client/ClientAbout.astro';
+import ClientContact from './client/ClientContact.astro';
+---
+
+<main>
+  <!-- Recruiter program (v1). Default-visible → crawlers & no-JS land here. -->
+  <div data-view-content="recruiter">
+    <Hero />
+    <About />
+    <Projects />
+    <Experience />
+    <Stack />
+    <GitHub />
+  </div>
+
+  <!-- Client program (v2). Shown only when data-view='client'. -->
+  <div data-view-content="client">
+    <ClientHero />
+    <ClientServices />
+    <ClientWork />
+    <ClientAbout />
+    <ClientContact />
+  </div>
+</main>
+
+<Footer />

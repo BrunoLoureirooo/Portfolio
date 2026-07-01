@@ -352,14 +352,23 @@ const info = [
 
   if (el && !reduce) {
     const full = el.textContent ?? '';
-    el.textContent = '';
-    let i = 0;
     const speed = 42; // matches --type-speed
-    const type = () => {
-      i += 1;
-      el.textContent = full.slice(0, i);
-      if (i < full.length) window.setTimeout(type, speed);
+    let timer: number | undefined;
+    const run = () => {
+      window.clearTimeout(timer);
+      el.textContent = '';
+      let i = 0;
+      const type = () => {
+        i += 1;
+        el.textContent = full.slice(0, i);
+        if (i < full.length) timer = window.setTimeout(type, speed);
+      };
+      type();
     };
-    type();
+    run();
+    // Re-type when the recruiter program is (re)shown via a view swap (DESIGN §8).
+    document.addEventListener('view:changed', (e) => {
+      if ((e as CustomEvent).detail === 'recruiter') run();
+    });
   }
 </script>

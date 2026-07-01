@@ -1,0 +1,62 @@
+---
+// ClientServices (#services · cat services.md) — outcome cards, NOT a feature
+// grid. Each is a plain-language result with a small amber "↳ outcome" tag.
+// PLACEHOLDER copy (doc draft) — finalized + i18n'd in step 4.
+import Section from '../Section.astro';
+import { useTranslations } from '../../i18n/utils';
+
+const t = useTranslations(Astro.currentLocale);
+
+const outcomes = [
+  t('c.svc.calendar'),
+  t('c.svc.noshows'),
+  t('c.svc.reminders'),
+  t('c.svc.site'),
+];
+---
+
+<Section
+  id="services"
+  title={t('c.section.services.title')}
+  cmd={t('c.section.services.cmd')}
+>
+  <ul class="svc">
+    {
+      outcomes.map((o) => (
+        <li class="svc__card">
+          <span class="svc__title">{o}</span>
+          <span class="svc__tag">{t('c.svc.tag')}</span>
+        </li>
+      ))
+    }
+  </ul>
+</Section>
+
+<style>
+  .svc {
+    list-style: none;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: var(--space-4);
+  }
+  .svc__card {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+    padding: var(--space-5);
+    background-color: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+  }
+  .svc__title {
+    color: var(--green);
+    font-weight: var(--weight-medium);
+    line-height: var(--leading-snug);
+  }
+  .svc__tag {
+    align-self: flex-start;
+    color: var(--accent);
+    font-size: var(--text-xs);
+  }
+</style>

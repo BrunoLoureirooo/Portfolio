@@ -1,0 +1,52 @@
+---
+// ClientAbout (#c-about · whoami --client) — short, client-centric "why me".
+// Real engineering background translated to trust language; honest that studio
+// work is new. PLACEHOLDER copy — finalized + i18n'd in step 4. Optional FAQ
+// toggle is wired in the final pass.
+import Section from '../Section.astro';
+import { useTranslations } from '../../i18n/utils';
+
+const t = useTranslations(Astro.currentLocale);
+---
+
+<Section
+  id="c-about"
+  title={t('c.section.about.title')}
+  cmd={t('c.section.about.cmd')}
+>
+  <p class="cabout__note">{t('c.about.note')}</p>
+  <p class="cabout__lead">{t('c.about.lead')}</p>
+  <ul class="cabout__trust">
+    <li>{t('c.about.trust.direct')}</li>
+    <li>{t('c.about.trust.pricing')}</li>
+    <li>{t('c.about.trust.background')}</li>
+  </ul>
+</Section>
+
+<style>
+  .cabout__note {
+    color: var(--accent);
+    font-size: var(--text-sm);
+    margin-bottom: var(--space-3);
+  }
+  .cabout__lead {
+    max-width: 60ch;
+    color: var(--fg);
+    line-height: var(--leading-normal);
+  }
+  .cabout__trust {
+    list-style: none;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+    margin-top: var(--space-5);
+  }
+  .cabout__trust li {
+    color: var(--green);
+    font-size: var(--text-xs);
+    border: 1px solid var(--green-line);
+    border-radius: var(--radius-sm);
+    padding: var(--space-1) var(--space-3);
+  }
+</style>

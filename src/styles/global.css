@@ -90,6 +90,113 @@ a:hover {
   color: var(--text);
 }
 
+/* --- v2 audience-gated views ---
+   data-view on <html> (set before paint by the no-flash script) decides which
+   program shows. Selector and program content are mutually exclusive.
+   Attribute UNSET (JS off / crawlers) → program visible, selector hidden:
+   real content, never a dead selector. */
+.entry {
+  display: none;
+}
+[data-view='ask'] .entry {
+  display: flex;
+}
+
+/* While selecting, hide the program and the nav (title bar + clock stay). */
+[data-view='ask'] main,
+[data-view='ask'] .footer,
+[data-view='ask'] .nav {
+  display: none;
+}
+
+/* Switch pill: show only the one that flips to the OTHER program. */
+.nav__switch {
+  display: none;
+}
+[data-view='recruiter'] .nav__switch--to-client,
+[data-view='client'] .nav__switch--to-recruiter {
+  display: inline-block;
+}
+
+/* Section tabs — each program has its own tablist; show the active program's.
+   Base display + per-view gating live here (not Nav's scoped CSS) so the two
+   tablists switch without a cross-stylesheet specificity tie. */
+.nav__tabs {
+  display: flex;
+}
+.nav__tabs--client {
+  display: none; /* client tabs hidden by default (recruiter is the default view) */
+}
+[data-view='client'] .nav__tabs--recruiter {
+  display: none;
+}
+[data-view='client'] .nav__tabs--client {
+  display: flex;
+}
+
+/* Mobile: drop section tabs (one-scroll page). The [data-view]-prefixed rule
+   matches the show rules' specificity and, placed after them, wins; the plain
+   rule covers no-JS (no data-view attribute). */
+@media (max-width: 640px) {
+  .nav__tabs {
+    display: none;
+  }
+  [data-view] .nav__tabs--recruiter,
+  [data-view] .nav__tabs--client {
+    display: none;
+  }
+}
+
+/* Program content. Recruiter is the default (shown when attr is unset/'recruiter'
+   → crawlers & no-JS get the real v1 content). Client shows only when chosen. */
+[data-view-content='client'] {
+  display: none;
+}
+[data-view='client'] [data-view-content='recruiter'] {
+  display: none;
+}
+[data-view='client'] [data-view-content='client'] {
+  display: block;
+}
+
+/* Client-view CTAs — capped at two per section (DESIGN §7): one amber primary
+   (book a call) + one green-hover ghost. Shared by the client hero & contact. */
+.c-cta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4em;
+  min-height: 2.75rem; /* 44px — comfortable touch target for the primary CTAs */
+  font-size: var(--text-sm);
+  text-decoration: none;
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  padding: var(--space-2) var(--space-4);
+  transition:
+    background-color var(--duration-base) var(--ease-out-quart),
+    color var(--duration-base) var(--ease-out-quart),
+    border-color var(--duration-base) var(--ease-out-quart),
+    box-shadow var(--duration-base) var(--ease-out-quart);
+}
+.c-cta--primary {
+  color: var(--bg);
+  background-color: var(--accent);
+  border-color: var(--accent);
+  font-weight: var(--weight-bold);
+}
+.c-cta--primary:hover {
+  box-shadow: 0 0 10px var(--accent-ring);
+}
+.c-cta--ghost {
+  color: var(--fg);
+  border-color: var(--border);
+}
+.c-cta--ghost:hover {
+  color: var(--green);
+  border-color: var(--green);
+  box-shadow: var(--glow-green);
+}
+
 /* --- Reduced motion: global baseline.
    Components add their own reduce-alternatives; this kills
    incidental animation/scroll for users who opt out. --- */
