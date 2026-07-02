@@ -1,0 +1,178 @@
+/* DemoModal — a terminal-style floating window framing a live demo iframe.
+   Sits at --z-modal (300): below the CRT overlay (500), so scanlines still
+   fall over it — the client's site really does live "inside your terminal". */
+
+.demomodal {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-modal);
+  display: grid;
+  place-items: center;
+  padding: var(--space-6);
+}
+
+.demomodal__backdrop {
+  position: absolute;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.72);
+  backdrop-filter: blur(2px);
+  animation: demomodal-fade var(--duration-base) var(--ease-out-quart);
+}
+
+.demomodal__panel {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  width: min(1100px, 94vw);
+  height: min(80vh, 760px);
+  overflow: hidden;
+  background-color: var(--panel);
+  border: 1px solid var(--green-line);
+  border-radius: var(--radius-window);
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.6), 0 24px 60px rgba(0, 0, 0, 0.55);
+  animation: demomodal-in var(--duration-slow) var(--ease-out-expo);
+}
+
+/* Window title bar — mirrors the page's own terminal chrome. */
+.demomodal__bar {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  padding: var(--space-3) var(--space-4);
+  background-color: var(--bg);
+  border-bottom: 1px solid var(--border);
+}
+
+.demomodal__title {
+  flex: 1;
+  min-width: 0;
+  color: var(--green);
+  font-size: var(--text-sm);
+  text-shadow: var(--glow-green);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.demomodal__open {
+  color: var(--accent);
+  font-size: var(--text-sm);
+  text-decoration: none;
+  white-space: nowrap;
+}
+.demomodal__open:hover {
+  text-decoration: underline;
+}
+
+/* Traffic lights — same 12px dots as the page title bar (shared --dot-*
+   tokens). Red is a real button: it closes the window, like the layout's. */
+.demomodal__dots {
+  display: flex;
+  gap: var(--space-2);
+}
+
+.demomodal__dot {
+  width: 12px;
+  height: 12px;
+  padding: 0;
+  border: none;
+  border-radius: var(--radius-full);
+}
+
+.demomodal__dot--red {
+  background-color: var(--dot-red);
+  cursor: pointer;
+}
+.demomodal__dot--red:focus-visible {
+  outline: 2px solid var(--green);
+  outline-offset: 2px;
+}
+
+.demomodal__dot--yellow {
+  background-color: var(--dot-yellow);
+}
+.demomodal__dot--green {
+  background-color: var(--dot-green);
+}
+
+/* Viewport = the frame area. Terminal --bg while loading; the loader sits
+   absolutely centered under the iframe, which fades in over it on `load`
+   (Jakub: functional enter, opacity only — no white flash mid-fetch). */
+.demomodal__viewport {
+  position: relative;
+  flex: 1;
+  display: flex;
+  background-color: var(--bg);
+}
+
+.demomodal__loading {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-content: center;
+  color: var(--muted);
+  font-size: var(--text-sm);
+}
+
+/* Terminal blinking block cursor — the site's own idiom. steps(2) = hard
+   on/off like a real TTY, no soft pulse. Dies with the loader on load. */
+.demomodal__cursor {
+  color: var(--green);
+  margin-left: var(--space-1);
+  animation: demomodal-blink 1s steps(2, start) infinite;
+}
+
+/* The demo itself — white background so the real site isn't tinted by --bg.
+   Hidden until `load` fires, then a quick functional fade-in. */
+.demomodal__frame {
+  flex: 1;
+  width: 100%;
+  border: 0;
+  background-color: #fff;
+  opacity: 0;
+  transition: opacity var(--duration-base) var(--ease-out-quart);
+}
+.demomodal__frame.is-loaded {
+  opacity: 1;
+}
+
+/* Focus sentinel — real tab stop, zero pixels. Focus never rests here (its
+   onFocus immediately forwards), so no visible outline flash. */
+.demomodal__sentinel {
+  position: absolute;
+  width: 0;
+  height: 0;
+  overflow: hidden;
+}
+
+@keyframes demomodal-fade {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes demomodal-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.98);
+  }
+}
+
+@keyframes demomodal-blink {
+  50% {
+    opacity: 0;
+  }
+}
+
+/* Reduced motion: no enter animations, static cursor (DESIGN.md caret rule),
+   iframe appears instantly — loader text alone still says what's happening. */
+@media (prefers-reduced-motion: reduce) {
+  .demomodal__backdrop,
+  .demomodal__panel,
+  .demomodal__cursor {
+    animation: none;
+  }
+  .demomodal__frame {
+    transition: none;
+  }
+}

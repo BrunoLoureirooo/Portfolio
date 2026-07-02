@@ -1,0 +1,604 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>portfolio motion audit — 2026-07-02</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Familjen+Grotesk:wght@400;500;600;700&family=Public+Sans:wght@400;500;600;700&family=Geist+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --ink:        oklch(0.155 0.006 255);
+  --surface:    oklch(0.195 0.007 255);
+  --surface-2:  oklch(0.235 0.008 255);
+  --paper:      oklch(0.945 0.004 255);
+  --paper-dim:  oklch(0.800 0.006 255);
+  --muted:      oklch(0.680 0.008 255);
+  --faint:      oklch(0.505 0.008 255);
+  --line:       oklch(0.95 0.01 255 / 0.09);
+  --line-strong:oklch(0.95 0.01 255 / 0.16);
+
+  --sev-crit: oklch(0.655 0.185 25);
+  --sev-imp:  oklch(0.805 0.125 78);
+  --sev-opp:  oklch(0.745 0.135 152);
+  --t-good: var(--sev-opp);
+  --t-mid:  var(--sev-imp);
+  --t-slow: var(--sev-crit);
+
+  --accent: var(--paper);
+  --accent-soft: var(--paper-dim);
+  --accent-tint: oklch(0.945 0.004 255 / 0.06);
+
+  --display: "Familjen Grotesk", "Hanken Grotesk", system-ui, sans-serif;
+  --sans: "Public Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+  --mono: "Geist Mono", ui-monospace, "SF Mono", Menlo, monospace;
+}
+:root:has(#theme-light:checked) {
+  --ink:        oklch(0.985 0.003 255);
+  --surface:    oklch(0.965 0.004 255);
+  --surface-2:  oklch(0.940 0.005 255);
+  --paper:      oklch(0.180 0.006 255);
+  --paper-dim:  oklch(0.330 0.008 255);
+  --muted:      oklch(0.475 0.010 255);
+  --faint:      oklch(0.640 0.009 255);
+  --line:       oklch(0.180 0.010 255 / 0.12);
+  --line-strong:oklch(0.180 0.010 255 / 0.22);
+  --sev-crit: oklch(0.55 0.20 25);
+  --sev-imp:  oklch(0.60 0.13 78);
+  --sev-opp:  oklch(0.55 0.14 152);
+  --accent-tint: oklch(0.180 0.006 255 / 0.05);
+}
+* { box-sizing: border-box; }
+body { background: var(--ink); color: var(--paper); font-family: var(--sans); margin: 0; padding: 0; line-height: 1.6; }
+.wrap { max-width: 1060px; margin: 0 auto; padding: 40px 28px 80px; }
+.vh { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+code { font-family: var(--mono); font-size: 0.86em; background: var(--accent-tint); padding: 1px 5px; border-radius: 4px; }
+h1, h2, h3, h4 { font-family: var(--display); line-height: 1.2; margin: 0; }
+a { color: inherit; }
+
+.theme-switch { display: flex; justify-content: flex-end; margin-bottom: 28px; }
+.theme-switch .seg { display: inline-flex; border: 1px solid var(--line-strong); border-radius: 100px; overflow: hidden; }
+.theme-switch .seg label { font-family: var(--mono); font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); padding: 5px 12px; cursor: pointer; user-select: none; }
+:root:has(#theme-dark:checked) .theme-switch label[for="theme-dark"],
+:root:has(#theme-light:checked) .theme-switch label[for="theme-light"] { background: color-mix(in oklch, var(--paper) 12%, transparent); color: var(--paper); }
+
+.eyebrow { font-family: var(--mono); font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--faint); margin: 0 0 10px; }
+.title { font-size: clamp(26px, 4vw, 38px); font-weight: 700; letter-spacing: -0.01em; }
+.lede { color: var(--paper-dim); max-width: 62ch; margin: 14px 0 0; }
+.meta-row { font-family: var(--mono); font-size: 11.5px; color: var(--muted); margin-top: 10px; }
+.stats { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 22px; }
+.stats a { display: inline-flex; align-items: baseline; gap: 7px; border: 1px solid var(--line-strong); border-radius: 8px; padding: 8px 14px; text-decoration: none; font-family: var(--mono); font-size: 12px; color: var(--muted); }
+.stats b { font-family: var(--display); font-size: 19px; color: var(--paper); }
+.stats .dot { width: 8px; height: 8px; border-radius: 50%; align-self: center; }
+.d-crit { background: var(--sev-crit); } .d-imp { background: var(--sev-imp); } .d-opp { background: var(--sev-opp); }
+
+section { margin-top: 56px; }
+.mono-label { font-family: var(--mono); font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--faint); margin-bottom: 14px; }
+.assessment p { font-family: var(--display); font-size: clamp(17px, 2.4vw, 22px); font-weight: 500; line-height: 1.5; max-width: 70ch; margin: 0; }
+
+.lens-table { width: 100%; border-collapse: collapse; }
+.lens-table th { text-align: left; font-family: var(--mono); font-size: 10.5px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--faint); font-weight: 500; padding: 0 14px 10px 0; border-bottom: 1px solid var(--line-strong); }
+.lens-table td { padding: 14px 14px 14px 0; border-bottom: 1px solid var(--line); vertical-align: top; transition: border-color 0.2s ease; }
+.lens-table tr:hover td { border-color: var(--line-strong); }
+.chip { display: inline-block; font-family: var(--mono); font-size: 9.5px; letter-spacing: 0.1em; text-transform: uppercase; border: 1px solid var(--line-strong); border-radius: 100px; padding: 2px 9px; color: var(--muted); margin-left: 8px; }
+.verdict { white-space: nowrap; font-weight: 600; font-size: 14px; }
+.verdict .dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 7px; }
+
+.timing-grid { display: grid; grid-template-columns: 1fr 280px; gap: 28px; align-items: start; }
+.timing-grid svg { width: 100%; height: auto; border: 1px solid var(--line); border-radius: 10px; background: var(--surface); }
+.zone-good { fill: color-mix(in oklch, var(--t-good) 14%, transparent); }
+.zone-mid  { fill: color-mix(in oklch, var(--t-mid) 14%, transparent); }
+.zone-slow { fill: color-mix(in oklch, var(--t-slow) 14%, transparent); }
+.zone-lbl  { font-family: var(--mono); font-size: 10px; fill: var(--faint); letter-spacing: 0.08em; }
+.axis-lbl  { font-family: var(--mono); font-size: 10px; fill: var(--muted); }
+.tdot      { fill: var(--t-good); }
+.tdot-mid  { fill: var(--t-mid); }
+.tdot-none { fill: none; stroke: var(--sev-crit); stroke-dasharray: 3 3; stroke-width: 1.5; }
+.tdot-lbl  { font-family: var(--mono); font-size: 10.5px; font-weight: 600; fill: var(--ink); }
+.tdot-lbl--none { fill: var(--sev-crit); }
+.timing-key { font-size: 13px; }
+.timing-key ol { margin: 0; padding: 0 0 0 2px; list-style: none; }
+.timing-key li { display: flex; gap: 10px; padding: 7px 0; border-bottom: 1px solid var(--line); }
+.timing-key .n { font-family: var(--mono); font-size: 11px; color: var(--faint); min-width: 16px; }
+.timing-key .t { font-family: var(--mono); font-size: 11px; color: var(--muted); margin-left: auto; white-space: nowrap; }
+.whats-off { margin-top: 18px; padding: 16px 18px; border: 1px solid var(--line-strong); border-radius: 10px; font-size: 14px; color: var(--paper-dim); }
+.whats-off b { color: var(--paper); }
+
+.lens-sec__head { display: flex; align-items: baseline; gap: 4px; flex-wrap: wrap; }
+.lens-sec__head h3 { font-size: 21px; }
+.lens-sec__verdict { color: var(--paper-dim); font-size: 14px; margin: 8px 0 0; }
+.lens-block { margin-top: 26px; }
+.lens-list { list-style: none; margin: 0; padding: 0; font-size: 14px; }
+.lens-list li { padding: 8px 0; border-bottom: 1px solid var(--line); color: var(--paper-dim); }
+.lens-list li b { color: var(--paper); font-weight: 600; }
+.lens-list.good li::before { content: "✓  "; color: var(--sev-opp); font-weight: 700; }
+.lens-list.opp li::before { content: "💡 "; }
+.lens-empty { color: var(--faint); font-style: italic; font-size: 14px; }
+.lens-take { margin-top: 26px; padding: 16px 18px; background: var(--accent-tint); border-radius: 10px; font-size: 14.5px; color: var(--paper-dim); }
+.lens-take b { color: var(--paper); }
+
+.finding-row { display: grid; grid-template-columns: 1fr 380px; gap: 28px; padding: 26px 0; border-bottom: 1px solid var(--line); transition: border-color 0.2s ease; }
+.finding-row:hover { border-color: var(--line-strong); }
+.find-tags { display: flex; gap: 8px; margin-bottom: 10px; }
+.sev-chip { font-family: var(--mono); font-size: 9.5px; letter-spacing: 0.12em; text-transform: uppercase; border-radius: 100px; padding: 3px 10px; font-weight: 600; }
+.sev-chip--crit { background: color-mix(in oklch, var(--sev-crit) 18%, transparent); color: var(--sev-crit); }
+.sev-chip--imp { background: color-mix(in oklch, var(--sev-imp) 18%, transparent); color: var(--sev-imp); }
+.find-title { font-size: 17px; margin-bottom: 10px; }
+.find-body p { font-size: 14px; color: var(--paper-dim); margin: 0 0 10px; }
+.find-body .label { display: block; font-family: var(--mono); font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--faint); margin-bottom: 2px; }
+.fix { border: 1px solid var(--line-strong); border-radius: 10px; padding: 12px 14px; margin: 14px 0; }
+.find-loc { font-family: var(--mono); font-size: 11.5px; }
+
+.demo { position: relative; width: 100%; max-width: 380px; }
+.demo__bar { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin-bottom: 12px; }
+.demo__meta { min-width: 0; }
+.demo__title { display: block; font-size: 13.5px; font-weight: 600; color: var(--paper); line-height: 1.3; }
+.demo__timing { display: block; font-family: var(--mono); font-size: 11px; color: var(--muted); margin-top: 2px; font-variant-numeric: tabular-nums; }
+.demo__controls { display: flex; align-items: center; gap: 12px; flex-shrink: 0; }
+.demo__loop { font-family: var(--mono); font-size: 12px; color: var(--faint); }
+.seg { display: inline-flex; border: 1px solid var(--line-strong); border-radius: 100px; overflow: hidden; }
+.seg label { font-family: var(--mono); font-size: 9.5px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); padding: 4px 9px; cursor: pointer; user-select: none; transition: background 0.15s ease, color 0.15s ease; }
+.demo input[id$="-a"]:checked ~ .demo__bar .seg label[for$="-a"],
+.demo input[id$="-l"]:checked ~ .demo__bar .seg label[for$="-l"],
+.demo input[id$="-d"]:checked ~ .demo__bar .seg label[for$="-d"] { background: color-mix(in oklch, var(--paper) 12%, transparent); color: var(--paper); }
+.demo__stage {
+  --st-bg: var(--surface-2); --st-fg: var(--paper); --st-line: var(--line-strong);
+  --st-dim: color-mix(in oklch, var(--paper) 55%, transparent);
+  background: var(--st-bg); color: var(--st-fg);
+  border: 1px solid var(--line); border-radius: 10px;
+  padding: 32px 24px; min-height: 168px;
+  display: flex; align-items: center; justify-content: center; overflow: hidden;
+}
+.demo input[id$="-l"]:checked ~ .demo__stage { --st-bg: oklch(0.985 0.003 255); --st-fg: oklch(0.180 0.006 255); --st-line: oklch(0.180 0.010 255 / 0.18); --st-dim: oklch(0.180 0.010 255 / 0.45); }
+.demo input[id$="-d"]:checked ~ .demo__stage { --st-bg: oklch(0.180 0.006 255); --st-fg: oklch(0.985 0.003 255); --st-line: oklch(0.985 0.010 255 / 0.18); --st-dim: oklch(0.985 0.010 255 / 0.50); }
+.ui-btn { display: inline-flex; align-items: center; justify-content: center; padding: 9px 18px; border-radius: 8px; background: var(--st-fg); color: var(--st-bg); font-family: var(--sans); font-size: 13px; font-weight: 600; }
+.ui-card { background: var(--st-bg); border: 1px solid var(--st-line); border-radius: 10px; padding: 14px 16px; min-width: 200px; box-shadow: 0 8px 24px oklch(0 0 0 / 0.12); }
+.ui-row { display: flex; align-items: center; gap: 10px; font-size: 13px; color: var(--st-fg); }
+.ui-label { font-family: var(--mono); font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--st-dim); }
+.ui-chip { display: inline-block; font-family: var(--mono); font-size: 11px; border: 1px solid var(--st-line); border-radius: 8px; padding: 6px 10px; color: var(--st-fg); }
+.ui-field { border: 1px solid var(--st-line); border-radius: 8px; padding: 7px 10px; font-size: 12px; color: var(--st-dim); }
+
+.rec-table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+.rec-table th { text-align: left; font-family: var(--mono); font-size: 10.5px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--faint); font-weight: 500; padding: 0 14px 8px 0; border-bottom: 1px solid var(--line-strong); }
+.rec-table td { padding: 11px 14px 11px 0; border-bottom: 1px solid var(--line); vertical-align: top; color: var(--paper-dim); }
+.tier-label { display: flex; align-items: baseline; gap: 10px; font-family: var(--mono); font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; margin: 34px 0 12px; }
+.tier-label .cnt { color: var(--faint); }
+.tl-crit { color: var(--sev-crit); } .tl-imp { color: var(--sev-imp); } .tl-opp { color: var(--sev-opp); }
+
+.ref-summary { padding: 20px 22px; border: 1px solid var(--line-strong); border-radius: 12px; font-size: 14px; color: var(--paper-dim); }
+.ref-summary b { color: var(--paper); }
+.ref-lean { display: grid; grid-template-columns: 1fr 1fr; gap: 6px 24px; margin-top: 12px; }
+footer { margin-top: 70px; font-family: var(--mono); font-size: 11px; color: var(--faint); border-top: 1px solid var(--line); padding-top: 18px; }
+
+@media (max-width: 860px) {
+  .finding-row { grid-template-columns: 1fr; }
+  .timing-grid { grid-template-columns: 1fr; }
+}
+@media (max-width: 600px) { .ref-lean { grid-template-columns: 1fr; } }
+
+@media (prefers-reduced-motion: reduce) {
+  .demo__loop { display: none; }
+  [class*="__mt"], [class*="__mt"] * { animation: none !important; transition: none !important; }
+}
+
+/* ── per-finding motion ── */
+@media (prefers-reduced-motion: no-preference) {
+  /* F1 — form reveal: fade + 6px rise, ease-out-quart, 180ms real time */
+  @keyframes m1 {
+    0%   { opacity: 0; transform: translateY(6px); }
+    12%  { opacity: 1; transform: translateY(0); }
+    60%  { opacity: 1; transform: translateY(0); }
+    100% { opacity: 1; transform: translateY(0); }
+  }
+  .demo-1__mt { animation: m1 3s cubic-bezier(0.25, 1, 0.5, 1) infinite; }
+
+  /* F2 — chip state transition: idle → hover → selected, 150ms per step */
+  @keyframes m2 {
+    0%, 18% { border-color: var(--st-line); color: var(--st-fg); box-shadow: none; }
+    28%, 42% { border-color: color-mix(in oklch, var(--st-fg) 55%, transparent); color: var(--st-fg); }
+    54%, 100% { border-color: var(--st-fg); color: var(--st-fg); box-shadow: 0 0 0 1px var(--st-fg) inset; }
+  }
+  .demo-2__mt .ui-chip { transition: none; animation: m2 3s ease infinite; }
+
+  /* F3 — loading→content crossfade: status line yields to chips, 60ms overlap */
+  @keyframes m3-out {
+    0%, 20% { opacity: 1; }
+    30%, 100% { opacity: 0; }
+  }
+  @keyframes m3-in {
+    0%, 26% { opacity: 0; transform: translateY(4px); }
+    40%, 100% { opacity: 1; transform: translateY(0); }
+  }
+  .demo-3__mt { position: relative; }
+  .demo-3__mt .m3-loading { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; animation: m3-out 3s ease-out infinite; }
+  .demo-3__mt .m3-content { animation: m3-in 3s cubic-bezier(0.25, 1, 0.5, 1) infinite; }
+
+  /* F4 — subtle exit then re-enter: 140ms fade-down, quicker than the 320ms enter */
+  @keyframes m4 {
+    0%, 15%  { opacity: 1; transform: translateY(0) scale(1); }
+    24%, 38% { opacity: 0; transform: translateY(-4px) scale(0.99); }
+    55%, 100% { opacity: 1; transform: translateY(0) scale(1); }
+  }
+  .demo-4__mt { animation: m4 3s cubic-bezier(0.25, 1, 0.5, 1) infinite; }
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="theme-switch">
+    <input class="vh" type="radio" name="theme" id="theme-dark" checked>
+    <input class="vh" type="radio" name="theme" id="theme-light">
+    <div class="seg">
+      <label for="theme-dark">Dark</label>
+      <label for="theme-light">Light</label>
+    </div>
+  </div>
+
+  <header>
+    <p class="eyebrow">Motion Audit · design-motion-principles</p>
+    <h1 class="title">portfolio — BookingModal motion audit</h1>
+    <p class="lede">New self-hosted call-booking dialog on a terminal/CRT-styled developer portfolio. Entrance motion inherited from the site's DemoModal; the day/time pickers, form reveal, and confirmation states are new surface.</p>
+    <p class="meta-row">Astro + Preact island · CSS-only motion · tokens from tokens.css · Europe/Lisbon booking windows</p>
+    <div class="stats">
+      <a href="#rec-crit"><b>4</b> findings</a>
+      <a href="#rec-crit"><span class="dot d-crit"></span><b>1</b> critical</a>
+      <a href="#rec-imp"><span class="dot d-imp"></span><b>3</b> important</a>
+      <a href="#rec-opp"><span class="dot d-opp"></span><b>3</b> opportunities</a>
+    </div>
+  </header>
+
+  <section class="assessment">
+    <p class="mono-label">Overall</p>
+    <p>The window chrome is right: the enter animation, tokens, and reduced-motion handling are lifted verbatim from the site's proven DemoModal, so the modal lands on-brand. The gap is everything <em>after</em> it opens — every state change inside the flow (loading→slots, picking a slot, submitting, confirming, closing) is an instant cut with no transition. The bones are polished; the flow is unpolished.</p>
+  </section>
+
+  <section>
+    <p class="mono-label">01 · Lens summary</p>
+    <table class="lens-table">
+      <thead><tr><th>Lens</th><th>Verdict</th><th>Read</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><b>Jakub Krehel</b> — Production Polish<span class="chip">Primary</span></td>
+          <td class="verdict"><span class="dot d-imp"></span>Concern</td>
+          <td>Entrance is production-grade; interior state changes snap. Hover states have zero transition — his most-cited polish miss.</td>
+        </tr>
+        <tr>
+          <td><b>Jhey Tompkins</b> — Experimentation &amp; Delight<span class="chip">Secondary</span></td>
+          <td class="verdict"><span class="dot d-opp"></span>Mixed</td>
+          <td>The "✓ booked." confirmation is a rare-moment stage begging for one terminal-flavored delight beat. Currently a hard cut.</td>
+        </tr>
+        <tr>
+          <td><b>Emil Kowalski</b> — Restraint &amp; Speed<span class="chip">Selective</span></td>
+          <td class="verdict"><span class="dot d-opp"></span>Strong</td>
+          <td>No slop: zero pulses, no stagger, no bouncy springs. Day-switching stays instant — correct for rapid comparison. Missing only :active press feedback.</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section>
+    <p class="mono-label">02 · Where the timings land</p>
+    <div class="timing-grid">
+      <svg viewBox="0 0 660 300" role="img" aria-label="Duration budget diagram: two animations in healthy zones, five interactions with no transition at 0ms">
+        <style>
+          .zb { rx: 0; }
+        </style>
+        <rect class="zone-good zb" x="40" y="30" width="100" height="210"/>
+        <rect class="zone-good zb" x="140" y="30" width="200" height="210"/>
+        <rect class="zone-mid zb" x="340" y="30" width="200" height="210"/>
+        <rect class="zone-slow zb" x="540" y="30" width="100" height="210"/>
+        <text class="zone-lbl" x="48" y="22">INSTANT</text>
+        <text class="zone-lbl" x="148" y="22">RESPONSIVE</text>
+        <text class="zone-lbl" x="348" y="22">DELIBERATE</text>
+        <text class="zone-lbl" x="548" y="22">SLUGGISH</text>
+        <text class="axis-lbl" x="36" y="262">0</text>
+        <text class="axis-lbl" x="126" y="262">100ms</text>
+        <text class="axis-lbl" x="322" y="262">300ms</text>
+        <text class="axis-lbl" x="522" y="262">500ms</text>
+        <circle class="tdot" cx="190" cy="80" r="13"/>
+        <text class="tdot-lbl" x="190" y="84" text-anchor="middle">1</text>
+        <circle class="tdot tdot-mid" cx="360" cy="80" r="13"/>
+        <text class="tdot-lbl" x="360" y="84" text-anchor="middle">2</text>
+        <circle class="tdot-none" cx="40" cy="130" r="13"/>
+        <text class="tdot-lbl tdot-lbl--none" x="40" y="134" text-anchor="middle">3</text>
+        <circle class="tdot-none" cx="40" cy="165" r="13"/>
+        <text class="tdot-lbl tdot-lbl--none" x="40" y="169" text-anchor="middle">4</text>
+        <circle class="tdot-none" cx="40" cy="200" r="13"/>
+        <text class="tdot-lbl tdot-lbl--none" x="40" y="204" text-anchor="middle">5</text>
+        <circle class="tdot-none" cx="40" cy="235" r="13"/>
+        <text class="tdot-lbl tdot-lbl--none" x="40" y="239" text-anchor="middle">6</text>
+        <circle class="tdot-none" cx="75" cy="130" r="13"/>
+        <text class="tdot-lbl tdot-lbl--none" x="75" y="134" text-anchor="middle">7</text>
+      </svg>
+      <div class="timing-key">
+        <ol>
+          <li><span class="n">1</span> Backdrop fade-in <span class="t">150ms · quart</span></li>
+          <li><span class="n">2</span> Panel enter <span class="t">320ms · expo</span></li>
+          <li><span class="n">3</span> Form reveal on slot pick <span class="t">none</span></li>
+          <li><span class="n">4</span> Chip hover / selected <span class="t">none</span></li>
+          <li><span class="n">5</span> Loading → slots swap <span class="t">none</span></li>
+          <li><span class="n">6</span> Form → confirmation <span class="t">none</span></li>
+          <li><span class="n">7</span> Dialog close <span class="t">none</span></li>
+        </ol>
+      </div>
+    </div>
+    <p class="whats-off"><b>What's off:</b> the two animations that exist sit in healthy zones (320ms is fine for a rare modal enter under Jakub's lens). The problem is the five hollow dots — every interaction <em>inside</em> the flow renders at 0ms with no transition at all. The imbalance reads as: polished shell, unfinished interior.</p>
+  </section>
+
+  <section>
+    <div class="lens-sec__head"><h3>Jakub Krehel — Production Polish</h3><span class="chip">Primary</span></div>
+    <p class="lens-sec__verdict"><span class="verdict"><span class="dot d-imp"></span>Concern</span> — the funnel's state changes lack the 150–200ms of care that separate "works" from "feels trustworthy".</p>
+
+    <div class="lens-block">
+      <p class="mono-label">What's working well</p>
+      <ul class="lens-list good">
+        <li><b>Entrance reuses the DemoModal recipe verbatim</b> — same tokens, curves, and 8px rise; system consistency over novelty — <code>BookingModal.css:31–33</code></li>
+        <li><b>Duration/easing come from design tokens</b>, not ad-hoc values — <code>var(--duration-slow) var(--ease-out-expo)</code></li>
+        <li><b>Backdrop fade (150ms) subtler than panel (320ms)</b> — correct hierarchy between layers</li>
+      </ul>
+    </div>
+
+    <div class="lens-block">
+      <p class="mono-label">Issues to address</p>
+
+      <div class="finding-row" data-sev="crit">
+        <div class="finding-row__prose">
+          <div class="find-tags"><span class="sev-chip sev-chip--crit">Critical</span><span class="chip">Jakub</span><span class="chip">Motion gap</span></div>
+          <h4 class="find-title">Booking form snaps into existence when a time is picked</h4>
+          <div class="find-body">
+            <p><span class="label">What</span>Selecting a slot conditionally renders the entire name/email form (<code>{slot &amp;&amp; &lt;BookingForm/&gt;}</code>) below the time grid with no transition — a full block of new UI appears in one frame and shifts the panel height.</p>
+            <p><span class="label">Why it matters</span>This is the primary conversion step of the funnel. An unannounced layout jump right after the user commits to a time reads as glitchy exactly when the UI needs to feel most trustworthy.</p>
+            <div class="fix"><p><span class="label">Recommended motion</span>Fade + 6px rise on the form container: <code>opacity 0→1, translateY(6px)→0</code>, 180ms, <code>var(--ease-out-quart)</code>, via a one-shot CSS animation on mount. Honor reduced motion (site pattern already does).</p></div>
+            <p class="find-loc"><code>src/components/client/BookingModal.tsx:154</code></p>
+          </div>
+        </div>
+        <div class="demo">
+          <input class="vh" type="radio" name="st1" id="st1-a" checked>
+          <input class="vh" type="radio" name="st1" id="st1-l">
+          <input class="vh" type="radio" name="st1" id="st1-d">
+          <div class="demo__bar">
+            <div class="demo__meta">
+              <span class="demo__title">Form reveal — fade + rise</span>
+              <span class="demo__timing">180ms · ease-out-quart</span>
+            </div>
+            <div class="demo__controls">
+              <div class="seg"><label for="st1-a">Auto</label><label for="st1-l">Light</label><label for="st1-d">Dark</label></div>
+              <span class="demo__loop">↻</span>
+            </div>
+          </div>
+          <div class="demo__stage">
+            <div class="demo-1__mt">
+              <div class="ui-card">
+                <div class="ui-label" style="margin-bottom:8px;">→ Thu 19:00</div>
+                <div class="ui-field" style="margin-bottom:6px;">name</div>
+                <div class="ui-field" style="margin-bottom:10px;">email</div>
+                <span class="ui-btn">$ book it →</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="finding-row" data-sev="imp">
+        <div class="finding-row__prose">
+          <div class="find-tags"><span class="sev-chip sev-chip--imp">Important</span><span class="chip">Jakub</span></div>
+          <h4 class="find-title">Day/time chips have zero hover or selection transition</h4>
+          <div class="find-body">
+            <p><span class="label">What</span>The <code>:hover</code> and <code>.is-active</code> rules change <code>color</code>, <code>border-color</code>, and <code>text-shadow</code> instantly — no <code>transition</code> property exists on <code>.bookmodal__day</code> / <code>.bookmodal__time</code> (nor on the close button).</p>
+            <p><span class="label">Why it matters</span>Jakub's most-repeated polish rule: even 150ms on hover states reads as more considered than instant snaps. These chips are the most-touched elements in the modal.</p>
+            <div class="fix"><p><span class="label">Recommended motion</span><code>transition: color 150ms, border-color 150ms;</code> on the shared chip rule. Color-only transitions are safe under reduced motion (no movement), so no media query needed.</p></div>
+            <p class="find-loc"><code>src/components/client/BookingModal.css:113–121</code></p>
+          </div>
+        </div>
+        <div class="demo">
+          <input class="vh" type="radio" name="st2" id="st2-a" checked>
+          <input class="vh" type="radio" name="st2" id="st2-l">
+          <input class="vh" type="radio" name="st2" id="st2-d">
+          <div class="demo__bar">
+            <div class="demo__meta">
+              <span class="demo__title">Chip: idle → hover → selected</span>
+              <span class="demo__timing">150ms · ease</span>
+            </div>
+            <div class="demo__controls">
+              <div class="seg"><label for="st2-a">Auto</label><label for="st2-l">Light</label><label for="st2-d">Dark</label></div>
+              <span class="demo__loop">↻</span>
+            </div>
+          </div>
+          <div class="demo__stage">
+            <div class="demo-2__mt"><span class="ui-chip">19:30</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="finding-row" data-sev="imp">
+        <div class="finding-row__prose">
+          <div class="find-tags"><span class="sev-chip sev-chip--imp">Important</span><span class="chip">Jakub</span><span class="chip">Motion gap</span></div>
+          <h4 class="find-title">Flow states hard-cut: loading → slots and form → confirmation</h4>
+          <div class="find-body">
+            <p><span class="label">What</span>The loading line is replaced by the full day/time grid in one frame (<code>if (!slots) return …</code>), and on success the form is replaced by the confirmation block the same way (<code>if (phase === 'done') return …</code>).</p>
+            <p><span class="label">Why it matters</span>Loading→content is the modal's "curtain up" — an instant swap wastes the arrival. The confirmation swap is worse: the user's payoff moment renders with less ceremony than the modal's own backdrop.</p>
+            <div class="fix"><p><span class="label">Recommended motion</span>One shared one-shot enter (fade + 4px rise, 150ms, quart) applied to the swapped-in container on mount — same keyframes reused for slots grid and confirmation block. Exits stay instant (subtler than enters, per Jakub).</p></div>
+            <p class="find-loc"><code>src/components/client/BookingModal.tsx:119–120, 196</code></p>
+          </div>
+        </div>
+        <div class="demo">
+          <input class="vh" type="radio" name="st3" id="st3-a" checked>
+          <input class="vh" type="radio" name="st3" id="st3-l">
+          <input class="vh" type="radio" name="st3" id="st3-d">
+          <div class="demo__bar">
+            <div class="demo__meta">
+              <span class="demo__title">Loading line yields to content</span>
+              <span class="demo__timing">150ms · ease-out-quart</span>
+            </div>
+            <div class="demo__controls">
+              <div class="seg"><label for="st3-a">Auto</label><label for="st3-l">Light</label><label for="st3-d">Dark</label></div>
+              <span class="demo__loop">↻</span>
+            </div>
+          </div>
+          <div class="demo__stage">
+            <div class="demo-3__mt">
+              <div class="m3-loading"><span class="ui-label">loading slots…</span></div>
+              <div class="m3-content">
+                <div class="ui-row" style="gap:6px;">
+                  <span class="ui-chip">13:30</span><span class="ui-chip">19:00</span><span class="ui-chip">19:30</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="finding-row" data-sev="imp">
+        <div class="finding-row__prose">
+          <div class="find-tags"><span class="sev-chip sev-chip--imp">Important</span><span class="chip">Jakub</span></div>
+          <h4 class="find-title">Dialog vanishes in a single frame on close</h4>
+          <div class="find-body">
+            <p><span class="label">What</span><code>setOpen(false)</code> unmounts the whole dialog instantly. Enter is a considered 320ms; exit is 0ms. (DemoModal shares this behavior — it's a site-wide precedent, not unique to this component.)</p>
+            <p><span class="label">Why it matters</span>Exits should be subtler than enters — but "subtler" isn't "absent". A one-frame disappearance of a full-screen surface is the kind of cut users register as abrupt without knowing why.</p>
+            <div class="fix"><p><span class="label">Recommended motion</span>140ms fade + 4px drift on a <code>closing</code> state before unmount (CSS class + <code>animationend</code>/timeout). If adopted, apply to DemoModal too so both windows share one exit grammar. Lowest priority of the four — precedent makes it a system decision, not a bug.</p></div>
+            <p class="find-loc"><code>src/components/client/BookingModal.tsx:67</code></p>
+          </div>
+        </div>
+        <div class="demo">
+          <input class="vh" type="radio" name="st4" id="st4-a" checked>
+          <input class="vh" type="radio" name="st4" id="st4-l">
+          <input class="vh" type="radio" name="st4" id="st4-d">
+          <div class="demo__bar">
+            <div class="demo__meta">
+              <span class="demo__title">Subtle exit (then re-enter)</span>
+              <span class="demo__timing">140ms · ease-out-quart</span>
+            </div>
+            <div class="demo__controls">
+              <div class="seg"><label for="st4-a">Auto</label><label for="st4-l">Light</label><label for="st4-d">Dark</label></div>
+              <span class="demo__loop">↻</span>
+            </div>
+          </div>
+          <div class="demo__stage">
+            <div class="demo-4__mt">
+              <div class="ui-card">
+                <div class="ui-label" style="margin-bottom:6px;">./book-call.sh</div>
+                <div class="ui-row">booking window ✕</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="lens-block">
+      <p class="mono-label">Opportunities</p>
+      <ul class="lens-list opp">
+        <li>Error message (<code>bookmodal__error</code>) could use the same 150ms fade+rise when it appears — failure feedback benefits from the same care as success — <code>BookingModal.tsx:229</code></li>
+      </ul>
+    </div>
+
+    <p class="lens-take"><b>Through Jakub's lens:</b> the shell borrowed polish, the interior didn't. One shared 150–180ms enter recipe applied at four swap points would bring the whole flow up to the chrome's standard.</p>
+  </section>
+
+  <section>
+    <div class="lens-sec__head"><h3>Jhey Tompkins — Experimentation &amp; Delight</h3><span class="chip">Secondary</span></div>
+    <p class="lens-sec__verdict"><span class="verdict"><span class="dot d-opp"></span>Mixed</span> — nothing broken, one missed stage.</p>
+
+    <div class="lens-block">
+      <p class="mono-label">What's working well</p>
+      <ul class="lens-list good">
+        <li><b>The terminal frame does the delight work</b> — CRT scanlines fall over the modal (z-order below the overlay), so the booking flow feels like it happens "inside the machine" for free</li>
+        <li><b>Amber submit CTA inside a green world</b> — the one-accent rule gives the commit moment chromatic weight without motion</li>
+      </ul>
+    </div>
+
+    <div class="lens-block">
+      <p class="mono-label">Issues to address</p>
+      <p class="lens-empty">No issues found at this severity level.</p>
+    </div>
+
+    <div class="lens-block">
+      <p class="mono-label">Opportunities</p>
+      <ul class="lens-list opp">
+        <li><b>"✓ booked." deserves a terminal beat</b> — type-on the confirmation title (~42ms/char, matching the hero's typewriter) or a two-blink block caret before the text settles. It's a once-per-visitor moment: exactly where this site's playfulness belongs. Static under reduced motion — <code>BookingModal.tsx:196</code></li>
+        <li><b>Submitting state could echo the prompt</b> — "booking…" with the site's existing caret-blink instead of a plain text swap — <code>BookingModal.tsx:238</code></li>
+      </ul>
+    </div>
+
+    <p class="lens-take"><b>Through Jhey's lens:</b> don't add motion everywhere — spend it once, on the confirmation. The portfolio already has a typewriter voice; let the booking success speak in it.</p>
+  </section>
+
+  <section>
+    <div class="lens-sec__head"><h3>Emil Kowalski — Restraint &amp; Speed</h3><span class="chip">Selective</span></div>
+    <p class="lens-sec__verdict"><span class="verdict"><span class="dot d-opp"></span>Strong</span> — the restraint half of the job is already done.</p>
+
+    <div class="lens-block">
+      <p class="mono-label">What's working well</p>
+      <ul class="lens-list good">
+        <li><b>Day switching stays instant</b> — users compare days rapidly; animating each grid swap would tax the highest-frequency interaction in the modal — <code>BookingModal.tsx:134</code></li>
+        <li><b>Zero AI-slop patterns</b> — no pulsing indicators, no stagger-spam, no hover-scale grids, no bouncy springs on utility actions</li>
+        <li><b>ESC close is unanimated</b> — keyboard-initiated actions correctly skip motion — <code>BookingModal.tsx:52</code></li>
+        <li><b>Reduced motion disables both entrance animations</b> — <code>BookingModal.css:103+</code></li>
+      </ul>
+    </div>
+
+    <div class="lens-block">
+      <p class="mono-label">Issues to address</p>
+      <p class="lens-empty">No issues found at this severity level.</p>
+    </div>
+
+    <div class="lens-block">
+      <p class="mono-label">Opportunities</p>
+      <ul class="lens-list opp">
+        <li><b>Press feedback</b> — <code>:active { transform: scale(0.97); }</code> on chips and the submit button; tactile, sub-100ms, invisible in the good way — <code>BookingModal.css:106</code></li>
+      </ul>
+    </div>
+
+    <p class="lens-take"><b>Through Emil's lens:</b> frequency discipline is already correct — the additions recommended elsewhere are all one-shot, sub-200ms, and none touch high-frequency paths. Approve them.</p>
+  </section>
+
+  <section>
+    <p class="mono-label">06 · Combined recommendations</p>
+
+    <div class="tier-label tl-crit" id="rec-crit">Critical · must fix <span class="cnt">1</span></div>
+    <table class="rec-table">
+      <thead><tr><th>Issue</th><th>File</th><th>Fix</th></tr></thead>
+      <tbody>
+        <tr><td>Form snaps in on slot pick</td><td><code>BookingModal.tsx:154</code></td><td>180ms fade + 6px rise on form mount, ease-out-quart, reduced-motion safe</td></tr>
+      </tbody>
+    </table>
+
+    <div class="tier-label tl-imp" id="rec-imp">Important · should fix <span class="cnt">3</span></div>
+    <table class="rec-table">
+      <thead><tr><th>Issue</th><th>File</th><th>Fix</th></tr></thead>
+      <tbody>
+        <tr><td>Chips: no hover/selection transition</td><td><code>BookingModal.css:106–121</code></td><td><code>transition: color 150ms, border-color 150ms</code> on chips + close button</td></tr>
+        <tr><td>Loading→slots and form→confirm hard cuts</td><td><code>BookingModal.tsx:119–120, 196</code></td><td>Shared 150ms one-shot enter on swapped-in containers</td></tr>
+        <tr><td>No exit on dialog close</td><td><code>BookingModal.tsx:67</code></td><td>140ms fade-out via closing state; mirror in DemoModal for one exit grammar</td></tr>
+      </tbody>
+    </table>
+
+    <div class="tier-label tl-opp" id="rec-opp">Opportunities · could enhance <span class="cnt">3</span></div>
+    <table class="rec-table">
+      <thead><tr><th>Enhancement</th><th>Where</th><th>Impact</th></tr></thead>
+      <tbody>
+        <tr><td>Type-on / caret beat on "✓ booked."</td><td><code>BookingModal.tsx:196</code></td><td>On-brand delight at the rare payoff moment</td></tr>
+        <tr><td><code>:active</code> scale(0.97) press feedback</td><td><code>BookingModal.css:106</code></td><td>Tactile feel on the most-touched controls</td></tr>
+        <tr><td>Fade+rise on error line</td><td><code>BookingModal.tsx:229</code></td><td>Failure feedback matches success polish</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section>
+    <p class="mono-label">07 · Lens reference summary</p>
+    <div class="ref-summary">
+      <p><b>Lens referenced most: Jakub Krehel — Production Polish.</b> The booking modal is conversion UI on a portfolio meant to win client trust; its shell already meets Jakub's bar and all four findings are interior-polish gaps of exactly the kind he catalogs (hover transitions, state-swap enters, exit asymmetry).</p>
+      <div class="ref-lean">
+        <span>→ <b>Lean more Emil:</b> skip the exit animation and confirm type-on; ship only the chip transitions + form reveal.</span>
+        <span>→ <b>Lean more Jakub:</b> apply all four fixes plus the error-line enter.</span>
+        <span>→ <b>Lean more Jhey:</b> add the confirmation type-on and caret-blink "booking…" state after the fixes land.</span>
+      </div>
+    </div>
+  </section>
+
+  <footer>portfolio · BookingModal · 1 critical · 3 important · 3 opportunities · 2026-07-02</footer>
+</div>
+</body>
+</html>

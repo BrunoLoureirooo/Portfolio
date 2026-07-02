@@ -282,6 +282,24 @@ const [titlePre, titlePost = ''] = t('chrome.title').split('~/dev');
     position: absolute;
     inset: -7px;
   }
+  /* macOS idiom: an ✕ glyph fades in over the red dot on hover/focus,
+     hinting the "close → back to selector" action. Dark mark on red. */
+  button.dot::before {
+    content: '×';
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    font-size: 11px;
+    line-height: 1;
+    color: rgba(0, 0, 0, 0.7);
+    opacity: 0;
+    transition: opacity var(--duration-base) var(--ease-out-quart);
+  }
+  button.dot:hover::before,
+  button.dot:focus-visible::before {
+    opacity: 1;
+  }
   button.dot:hover {
     filter: brightness(1.3);
   }

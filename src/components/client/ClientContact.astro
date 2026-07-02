@@ -5,6 +5,7 @@
 // PLACEHOLDER lead copy — finalized in step 4. Book-a-call URL is an open
 // decision (Cal.com/Calendly vs mailto) — placeholder href for now.
 import Section from '../Section.astro';
+import BookingModal from './BookingModal';
 import { getCvContent } from '../../lib/cvContent';
 import { bookingUrl } from '../../config';
 import { useTranslations } from '../../i18n/utils';
@@ -12,10 +13,30 @@ import { useTranslations } from '../../i18n/utils';
 const t = useTranslations(Astro.currentLocale);
 const { contact } = await getCvContent(Astro.currentLocale);
 
-// Real scheduling link if configured; otherwise a pre-filled email (no dead #).
+// Self-hosted booking modal is the default (docs/features/call-booking.md).
+// The mailto href stays on the anchor as the no-JS fallback; the island
+// intercepts the click once hydrated. An external bookingUrl (if ever set)
+// bypasses the modal entirely.
 const bookHref =
   bookingUrl ??
   `mailto:${contact.email}?subject=${encodeURIComponent('20-min call')}`;
+
+// Every string the island shows, translated here so it stays i18n-dumb.
+const bookingLabels = {
+  title: t('c.book.title'),
+  loading: t('c.book.loading'),
+  empty: t('c.book.empty'),
+  tzNote: t('c.book.tz'),
+  name: t('c.book.name'),
+  email: t('c.book.email'),
+  submit: t('c.book.submit'),
+  submitting: t('c.book.submitting'),
+  confirmTitle: t('c.book.confirm.title'),
+  confirmBody: t('c.book.confirm.body'),
+  error: t('c.book.error'),
+  back: t('c.book.back'),
+  close: t('c.book.close'),
+};
 ---
 
 <Section
@@ -26,18 +47,26 @@ const bookHref =
   <div class="contact-panel">
     <p class="contact-panel__lead">{t('c.contact.lead')}</p>
     <div class="contact-panel__ctas">
-      <a class="c-cta c-cta--primary" href={bookHref} data-cta="book">{t('c.cta.book')}</a>
+      <a
+        class="c-cta c-cta--primary"
+        href={bookHref}
+        data-cta="book"
+        data-book={bookingUrl ? undefined : true}
+      >{t('c.cta.book')}</a>
       <a class="c-cta c-cta--ghost" href={`mailto:${contact.email}`}>{t('c.cta.email')}</a>
     </div>
   </div>
 </Section>
 
+{!bookingUrl && <BookingModal client:idle labels={bookingLabels} />}
+
 <style>
   .contact-panel {
     padding: var(--space-8) var(--space-6);
-    background-color: var(--green-dim);
+    background-color: var(--panel);
     border: 1px solid var(--green-line);
     border-radius: var(--radius-md);
+    box-shadow: var(--glow-window);
   }
   .contact-panel__lead {
     color: var(--green);

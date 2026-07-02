@@ -87,6 +87,13 @@ export const ui = {
     'c.svc.site': 'A site that looks like you',
     // Work / about / contact prose.
     'c.work.note': '# concept demo — what I’d build for you, not a delivered result',
+    // Sample card actions + demo modal chrome (island is i18n-dumb, gets props).
+    'c.work.demo': '▸ open live demo',
+    'c.work.repo': 'source ↗',
+    'c.work.video': '↳ watch walkthrough',
+    'c.demo.open': 'open full ↗',
+    'c.demo.close': 'Close demo',
+    'c.demo.loading': 'loading demo…',
     'c.about.note': '# why me',
     'c.about.lead':
       'Direct, 1:1 — no agency layers. First studios get founder pricing. Studio work is new; the engineering behind it isn’t.',
@@ -94,6 +101,21 @@ export const ui = {
     'c.about.trust.pricing': 'founder pricing',
     'c.about.trust.background': 'payments and scheduling background',
     'c.contact.lead': 'Ready when you are — let’s talk about your studio.',
+    // Booking modal (docs/features/call-booking.md). Strings are passed to the
+    // island as props — the island itself is i18n-dumb.
+    'c.book.title': './book-call.sh — 20 min, google meet',
+    'c.book.loading': 'loading slots…',
+    'c.book.empty': 'no open slots right now — email me instead.',
+    'c.book.tz': '# times shown in your timezone',
+    'c.book.name': 'name',
+    'c.book.email': 'email',
+    'c.book.submit': '$ book it →',
+    'c.book.submitting': 'booking…',
+    'c.book.confirm.title': '✓ booked.',
+    'c.book.confirm.body': 'calendar invite with the meet link is on its way to your inbox.',
+    'c.book.error': 'that didn’t work — the slot may be taken. pick another or email me.',
+    'c.book.back': '← back',
+    'c.book.close': 'close booking',
 
     // Hero. Terminal-flavor lines (lastlogin/cmd) and the name stay constant;
     // neofetch labels + technical values are program output (kept as-is); only
@@ -231,6 +253,13 @@ export const ui = {
     'c.svc.reminders': 'Lembretes que chegam mesmo',
     'c.svc.site': 'Um site com a tua cara',
     'c.work.note': '# demo conceito — o que eu construiria para ti, não um resultado entregue',
+    // Ações do cartão + janela da demo.
+    'c.work.demo': '▸ abrir demo ao vivo',
+    'c.work.repo': 'código ↗',
+    'c.work.video': '↳ ver demonstração',
+    'c.demo.open': 'abrir completa ↗',
+    'c.demo.close': 'Fechar demo',
+    'c.demo.loading': 'a carregar demo…',
     'c.about.note': '# porquê eu',
     'c.about.lead':
       'Direto, 1:1 — sem camadas de agência. Os primeiros estúdios têm preço de lançamento. O trabalho com estúdios é novo; a engenharia por trás não é.',
@@ -238,6 +267,20 @@ export const ui = {
     'c.about.trust.pricing': 'preço de lançamento',
     'c.about.trust.background': 'experiência em pagamentos e agendamento',
     'c.contact.lead': 'Estou pronto quando estiveres — vamos falar do teu estúdio.',
+    // Modal de marcação (docs/features/call-booking.md).
+    'c.book.title': './book-call.sh — 20 min, google meet',
+    'c.book.loading': 'a carregar horários…',
+    'c.book.empty': 'sem horários livres — manda antes um email.',
+    'c.book.tz': '# horas no teu fuso horário',
+    'c.book.name': 'nome',
+    'c.book.email': 'email',
+    'c.book.submit': '$ marcar →',
+    'c.book.submitting': 'a marcar…',
+    'c.book.confirm.title': '✓ marcado.',
+    'c.book.confirm.body': 'o convite com o link do meet vai a caminho do teu email.',
+    'c.book.error': 'não resultou — o horário pode estar ocupado. escolhe outro ou manda email.',
+    'c.book.back': '← voltar',
+    'c.book.close': 'fechar marcação',
 
     'hero.lastlogin': 'Last login: Wed Jun 25 14:08:21 on ttys001',
     'hero.cmd': 'whoami',

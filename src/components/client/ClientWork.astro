@@ -5,6 +5,7 @@
 // only. Honesty rule: concept demos, never delivered results.
 import Section from '../Section.astro';
 import SampleCard from './SampleCard.astro';
+import DemoModal from './DemoModal';
 import { getCollection } from 'astro:content';
 import { useTranslations } from '../../i18n/utils';
 
@@ -24,6 +25,17 @@ const samples = (await getCollection('samples')).sort(
   <div class="work__list">
     {samples.map((s) => <SampleCard entry={s} />)}
   </div>
+
+  {/* One shared floating window; opens on any card's live button (delegation).
+      Labels resolved here at build time — the island stays i18n-dumb. */}
+  <DemoModal
+    client:idle
+    labels={{
+      open: t('c.demo.open'),
+      close: t('c.demo.close'),
+      loading: t('c.demo.loading'),
+    }}
+  />
 </Section>
 
 <style>

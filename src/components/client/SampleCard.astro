@@ -5,6 +5,7 @@
 // "◆ …"), never a green "live"; facts are demo facts, not business results.
 import { render } from 'astro:content';
 import type { CollectionEntry } from 'astro:content';
+import { useTranslations } from '../../i18n/utils';
 
 interface Props {
   entry: CollectionEntry<'samples'>;
@@ -12,6 +13,7 @@ interface Props {
 
 const { entry } = Astro.props;
 const { data } = entry;
+const t = useTranslations(Astro.currentLocale);
 const locale = Astro.currentLocale === 'pt' ? 'pt' : 'en';
 const hasMedia = data.media.length > 0;
 // Markdown body → the closing founder-pricing / "studio work is new" note.
@@ -61,7 +63,34 @@ const { Content } = await render(entry);
       )
     }
 
-    {data.video && <a class="sample__video" href={data.video}>↳ watch walkthrough</a>}
+    {data.video && <a class="sample__video" href={data.video}>{t('c.work.video')}</a>}
+
+    {
+      (data.demoUrl || data.repo) && (
+        <div class="sample__actions">
+          {data.demoUrl && (
+            <button
+              class="sample__live"
+              type="button"
+              data-demo-url={data.demoUrl}
+              data-demo-title={data.title[locale]}
+            >
+              {t('c.work.demo')}
+            </button>
+          )}
+          {data.repo && (
+            <a
+              class="sample__repo"
+              href={data.repo}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              {t('c.work.repo')}
+            </a>
+          )}
+        </div>
+      )
+    }
 
     <div class="sample__note"><Content /></div>
   </div>
@@ -174,6 +203,41 @@ const { Content } = await render(entry);
   }
   .sample__video:hover {
     text-decoration: underline;
+  }
+
+  /* Actions row — live demo is the star (green), source stays quiet. */
+  .sample__actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-3);
+    margin-top: var(--space-2);
+  }
+  .sample__live {
+    color: var(--green);
+    background-color: var(--green-dim);
+    border: 1px solid var(--green-line);
+    border-radius: var(--radius-sm);
+    padding: var(--space-2) var(--space-4);
+    font: inherit;
+    font-size: var(--text-sm);
+    cursor: pointer;
+    transition:
+      box-shadow var(--duration-base) var(--ease-out-quart),
+      border-color var(--duration-base) var(--ease-out-quart);
+  }
+  .sample__live:hover,
+  .sample__live:focus-visible {
+    border-color: var(--green);
+    box-shadow: var(--glow-green);
+  }
+  .sample__repo {
+    color: var(--muted);
+    font-size: var(--text-sm);
+    text-decoration: none;
+  }
+  .sample__repo:hover {
+    color: var(--green);
   }
 
   .sample__note {

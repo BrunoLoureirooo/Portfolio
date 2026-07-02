@@ -54,6 +54,11 @@ const samples = defineCollection({
     summary: localized,
     media: z.array(z.string()).default([]),   // committed paths under public/
     video: z.string().optional(),             // optional <1-min walkthrough
+    // Live demo you host + control (so it can be framed in the modal). The
+    // card becomes clickable when this is set; absent = no live link.
+    demoUrl: z.string().url().optional(),
+    // Optional source repo ("view source" link on the card).
+    repo: z.string().url().optional(),
     // Demo facts, NOT business results (e.g. label "to book" / value "60s").
     facts: z
       .array(z.object({ label: localized, value: z.string() }))

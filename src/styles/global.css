@@ -95,10 +95,13 @@ a:hover {
    program shows. Selector and program content are mutually exclusive.
    Attribute UNSET (JS off / crawlers) → program visible, selector hidden:
    real content, never a dead selector. */
-.entry {
+/* Qualify by tag: the audience selector is a <section class="entry">, but the
+   Experience timeline ALSO uses <li class="entry"> per row. A bare `.entry`
+   here hid the whole work-experience list in recruiter/client views. */
+section.entry {
   display: none;
 }
-[data-view='ask'] .entry {
+[data-view='ask'] section.entry {
   display: flex;
 }
 

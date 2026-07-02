@@ -1,0 +1,252 @@
+/* BookingModal — same terminal-window chrome as DemoModal (tokens, enter
+   motion, z-order under the CRT overlay at 500) but sized for a form, not an
+   iframe: narrower panel, height from content. */
+
+.bookmodal {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-modal);
+  display: grid;
+  place-items: center;
+  padding: var(--space-6);
+}
+
+.bookmodal__backdrop {
+  position: absolute;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.72);
+  backdrop-filter: blur(2px);
+  animation: bookmodal-fade var(--duration-base) var(--ease-out-quart);
+}
+
+.bookmodal__panel {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  width: min(560px, 94vw);
+  max-height: min(86vh, 720px);
+  overflow: hidden auto;
+  background-color: var(--panel);
+  border: 1px solid var(--green-line);
+  border-radius: var(--radius-window);
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.6), 0 24px 60px rgba(0, 0, 0, 0.55);
+  animation: bookmodal-in var(--duration-slow) var(--ease-out-expo);
+}
+
+.bookmodal__bar {
+  position: sticky;
+  top: 0;
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  padding: var(--space-3) var(--space-4);
+  background-color: var(--bg);
+  border-bottom: 1px solid var(--border);
+}
+
+.bookmodal__title {
+  flex: 1;
+  min-width: 0;
+  color: var(--green);
+  font-size: var(--text-sm);
+  text-shadow: var(--glow-green);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.bookmodal__close {
+  padding: 0 var(--space-2);
+  color: var(--muted);
+  background: none;
+  border: none;
+  font: inherit;
+  font-size: var(--text-lg);
+  line-height: 1;
+  cursor: pointer;
+}
+.bookmodal__close:hover,
+.bookmodal__close:focus-visible {
+  color: var(--green);
+}
+
+/* ---- interior ---- */
+
+.bookmodal__body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  padding: var(--space-5) var(--space-4);
+}
+
+.bookmodal__status {
+  padding: var(--space-8) var(--space-4);
+  color: var(--muted);
+  text-align: center;
+}
+
+.bookmodal__tz {
+  color: var(--muted);
+  font-size: var(--text-sm);
+}
+
+/* Day strip — one row, scrolls sideways if two weeks don't fit. */
+.bookmodal__days {
+  display: flex;
+  gap: var(--space-2);
+  overflow-x: auto;
+  padding-bottom: var(--space-2);
+}
+
+.bookmodal__day,
+.bookmodal__time {
+  padding: var(--space-2) var(--space-3);
+  color: var(--fg);
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  font: inherit;
+  font-size: var(--text-sm);
+  white-space: nowrap;
+  cursor: pointer;
+  /* Color-only transitions are safe under reduced motion (nothing moves). */
+  transition: color var(--duration-base), border-color var(--duration-base);
+}
+.bookmodal__day:active,
+.bookmodal__time:active {
+  transform: scale(0.97); /* tactile press feedback (Emil's rule) */
+}
+.bookmodal__day:hover,
+.bookmodal__time:hover {
+  border-color: var(--green-line);
+  color: var(--green);
+}
+.bookmodal__day.is-active,
+.bookmodal__time.is-active {
+  color: var(--green);
+  border-color: var(--green);
+  text-shadow: var(--glow-green);
+}
+
+.bookmodal__times {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(84px, 1fr));
+  gap: var(--space-2);
+}
+
+/* ---- form ---- */
+
+.bookmodal__form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  border-top: 1px solid var(--border);
+  padding-top: var(--space-4);
+}
+
+.bookmodal__picked {
+  color: var(--green);
+  font-size: var(--text-sm);
+}
+
+.bookmodal__form label {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  color: var(--muted);
+  font-size: var(--text-sm);
+}
+
+.bookmodal__form input {
+  padding: var(--space-2) var(--space-3);
+  color: var(--fg);
+  background-color: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  font: inherit;
+}
+.bookmodal__form input:focus-visible {
+  outline: none;
+  border-color: var(--green);
+}
+
+/* Honeypot: gone visually + from a11y tree/tab order, present for bots. */
+.bookmodal__hp {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+}
+
+.bookmodal__form button[type='submit'] {
+  align-self: flex-start;
+  padding: var(--space-2) var(--space-4);
+  color: var(--bg);
+  background-color: var(--accent);
+  border: none;
+  border-radius: var(--radius-md);
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+.bookmodal__form button[type='submit']:disabled {
+  opacity: 0.6;
+  cursor: wait;
+}
+
+.bookmodal__error {
+  color: var(--accent);
+  font-size: var(--text-sm);
+}
+
+.bookmodal__confirm {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  border-top: 1px solid var(--border);
+  padding-top: var(--space-4);
+  overflow-wrap: anywhere;
+}
+.bookmodal__confirm-title {
+  color: var(--green);
+  text-shadow: var(--glow-green);
+}
+.bookmodal__confirm a {
+  color: var(--accent);
+}
+
+@keyframes bookmodal-fade {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes bookmodal-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.98);
+  }
+}
+
+/* One-shot enter for any flow state that mounts mid-flow (slots grid, form,
+   confirmation, error). One recipe = one grammar for the whole interior;
+   `backwards` prevents a flash before the animation starts. */
+.bookmodal__enter {
+  animation: bookmodal-rise var(--duration-base) var(--ease-out-quart) backwards;
+}
+
+@keyframes bookmodal-rise {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bookmodal__backdrop,
+  .bookmodal__panel,
+  .bookmodal__enter {
+    animation: none;
+  }
+}
