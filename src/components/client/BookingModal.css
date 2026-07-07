@@ -55,19 +55,35 @@
   white-space: nowrap;
 }
 
-.bookmodal__close {
-  padding: 0 var(--space-2);
-  color: var(--muted);
-  background: none;
+/* Traffic lights — same 12px dots as the page title bar and DemoModal
+   (shared --dot-* tokens). Red is a real button: it closes the window. */
+.bookmodal__dots {
+  display: flex;
+  gap: var(--space-2);
+}
+
+.bookmodal__dot {
+  width: 12px;
+  height: 12px;
+  padding: 0;
   border: none;
-  font: inherit;
-  font-size: var(--text-lg);
-  line-height: 1;
+  border-radius: var(--radius-full);
+}
+
+.bookmodal__dot--red {
+  background-color: var(--dot-red);
   cursor: pointer;
 }
-.bookmodal__close:hover,
-.bookmodal__close:focus-visible {
-  color: var(--green);
+.bookmodal__dot--red:focus-visible {
+  outline: 2px solid var(--green);
+  outline-offset: 2px;
+}
+
+.bookmodal__dot--yellow {
+  background-color: var(--dot-yellow);
+}
+.bookmodal__dot--green {
+  background-color: var(--dot-green);
 }
 
 /* ---- interior ---- */
@@ -90,15 +106,83 @@
   font-size: var(--text-sm);
 }
 
-/* Day strip — one row, scrolls sideways if two weeks don't fit. */
-.bookmodal__days {
+/* Calendar — unix `cal` spirit: weekday header row, plain day numbers, week
+   starts Monday. Bookable days are live; the rest sit dimmed. The selected
+   day is an inverted block, like a terminal cursor over the date. */
+.bookmodal__cal-head {
   display: flex;
-  gap: var(--space-2);
-  overflow-x: auto;
-  padding-bottom: var(--space-2);
+  align-items: center;
+  justify-content: space-between;
+}
+.bookmodal__cal-month {
+  color: var(--green);
+  font-size: var(--text-sm);
+  text-transform: lowercase;
+}
+.bookmodal__cal-nav {
+  padding: 0 var(--space-2);
+  color: var(--muted);
+  background: none;
+  border: none;
+  font: inherit;
+  font-size: var(--text-lg);
+  line-height: 1;
+  cursor: pointer;
+  transition: color var(--duration-base);
+}
+.bookmodal__cal-nav:hover:not(:disabled),
+.bookmodal__cal-nav:focus-visible {
+  color: var(--green);
+}
+.bookmodal__cal-nav:disabled {
+  opacity: 0.3;
+  cursor: default;
 }
 
-.bookmodal__day,
+.bookmodal__cal-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 2px;
+  margin-top: var(--space-2);
+}
+.bookmodal__cal-wd {
+  padding: var(--space-1) 0;
+  color: var(--muted);
+  font-size: var(--text-sm);
+  text-align: center;
+  text-transform: lowercase;
+}
+.bookmodal__cal-day {
+  padding: var(--space-2) 0;
+  color: var(--fg);
+  background: none;
+  border: 1px solid transparent; /* transparent, not none — hover adds color without layout shift */
+  border-radius: var(--radius-md);
+  font: inherit;
+  font-size: var(--text-sm);
+  text-align: center;
+  cursor: pointer;
+  transition: color var(--duration-base), border-color var(--duration-base),
+    background-color var(--duration-base);
+}
+.bookmodal__cal-day:disabled {
+  color: var(--muted);
+  opacity: 0.4;
+  cursor: default;
+}
+.bookmodal__cal-day:not(:disabled):hover {
+  color: var(--green);
+  border-color: var(--green-line);
+}
+.bookmodal__cal-day:not(:disabled):active {
+  transform: scale(0.97);
+}
+.bookmodal__cal-day.is-active {
+  color: var(--bg);
+  background-color: var(--green);
+  border-color: var(--green);
+}
+
 .bookmodal__time {
   padding: var(--space-2) var(--space-3);
   color: var(--fg);
@@ -112,16 +196,13 @@
   /* Color-only transitions are safe under reduced motion (nothing moves). */
   transition: color var(--duration-base), border-color var(--duration-base);
 }
-.bookmodal__day:active,
 .bookmodal__time:active {
   transform: scale(0.97); /* tactile press feedback (Emil's rule) */
 }
-.bookmodal__day:hover,
 .bookmodal__time:hover {
   border-color: var(--green-line);
   color: var(--green);
 }
-.bookmodal__day.is-active,
 .bookmodal__time.is-active {
   color: var(--green);
   border-color: var(--green);
@@ -134,19 +215,76 @@
   gap: var(--space-2);
 }
 
-/* ---- form ---- */
+/* Each wizard step is its own column; swapping steps remounts the container
+   (keyed), replaying the shared enter animation. */
+.bookmodal__step {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+/* Step-1 exit: green ghost button, arrow does the talking. Amber stays
+   reserved for the final commit ($ book it). */
+.bookmodal__next {
+  align-self: flex-start;
+  padding: var(--space-2) var(--space-4);
+  color: var(--green);
+  background: none;
+  border: 1px solid var(--green);
+  border-radius: var(--radius-md);
+  font: inherit;
+  font-size: var(--text-sm);
+  cursor: pointer;
+  transition: background-color var(--duration-base), color var(--duration-base);
+}
+.bookmodal__next:hover,
+.bookmodal__next:focus-visible {
+  background-color: var(--green);
+  color: var(--bg);
+}
+.bookmodal__next:active {
+  transform: scale(0.97);
+}
+
+/* ---- form (step 2) ---- */
 
 .bookmodal__form {
   display: flex;
   flex-direction: column;
   gap: var(--space-3);
-  border-top: 1px solid var(--border);
-  padding-top: var(--space-4);
+}
+
+/* Step-2 header: the choice carried over from step 1, plus the way back. */
+.bookmodal__stephead {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-3);
+  border-bottom: 1px solid var(--border);
+  padding-bottom: var(--space-3);
+  margin-bottom: var(--space-2);
+}
+
+.bookmodal__back {
+  padding: 0;
+  color: var(--muted);
+  background: none;
+  border: none;
+  font: inherit;
+  font-size: var(--text-sm);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: color var(--duration-base);
+}
+.bookmodal__back:hover,
+.bookmodal__back:focus-visible {
+  color: var(--green);
 }
 
 .bookmodal__picked {
   color: var(--green);
   font-size: var(--text-sm);
+  text-align: right;
 }
 
 .bookmodal__form label {
@@ -204,8 +342,6 @@
   display: flex;
   flex-direction: column;
   gap: var(--space-2);
-  border-top: 1px solid var(--border);
-  padding-top: var(--space-4);
   overflow-wrap: anywhere;
 }
 .bookmodal__confirm-title {

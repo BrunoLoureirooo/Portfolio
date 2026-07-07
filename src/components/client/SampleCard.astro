@@ -25,6 +25,22 @@ const { Content } = await render(entry);
     {
       hasMedia ? (
         <img src={data.media[0]} alt={data.title[locale]} loading="lazy" />
+      ) : data.demoUrl ? (
+        <div
+          class="sample__media-live"
+          data-demo-url={data.demoUrl}
+          data-demo-title={data.title[locale]}
+          title={t('c.work.demo')}
+        >
+          <span class="sample__media-empty" aria-hidden="true">▮ preview</span>
+          <iframe
+            src={data.demoUrl}
+            title={data.title[locale]}
+            loading="lazy"
+            tabindex="-1"
+            aria-hidden="true"
+          />
+        </div>
       ) : (
         <span class="sample__media-empty" aria-hidden="true">▮ preview</span>
       )
@@ -116,6 +132,16 @@ const { Content } = await render(entry);
     border: 1px dashed var(--border);
     border-radius: var(--radius-sm);
   }
+  .sample__media:has(.sample__media-live) {
+    border-style: solid;
+    transition:
+      box-shadow var(--duration-base) var(--ease-out-quart),
+      border-color var(--duration-base) var(--ease-out-quart);
+  }
+  .sample__media:has(.sample__media-live:hover) {
+    border-color: var(--green);
+    box-shadow: var(--glow-green);
+  }
   .sample__media img {
     width: 100%;
     height: 100%;
@@ -123,6 +149,31 @@ const { Content } = await render(entry);
   }
   .sample__media-empty {
     color: var(--muted);
+  }
+
+  /* Live preview — the demo site rendered at 4× the cell size, scaled to
+     0.25 so it shows its desktop layout as a thumbnail. pointer-events off
+     on the iframe → clicks land on the wrapper, which opens the DemoModal. */
+  .sample__media-live {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    min-height: 200px;
+    display: grid;
+    place-items: center;
+    cursor: pointer;
+    overflow: hidden;
+  }
+  .sample__media-live iframe {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 400%;
+    height: 400%;
+    transform: scale(0.25);
+    transform-origin: 0 0;
+    border: 0;
+    pointer-events: none;
   }
 
   .sample__body {

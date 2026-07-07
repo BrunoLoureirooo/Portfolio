@@ -13,6 +13,7 @@ export interface BookingLabels {
   tzNote: string;
   name: string;
   email: string;
+  next: string;
   submit: string;
   submitting: string;
   confirmTitle: string;
@@ -71,10 +72,21 @@ export default function BookingModal({ labels }: { labels: BookingLabels }) {
       <div class="bookmodal__backdrop" onClick={close} />
       <div class="bookmodal__panel">
         <header class="bookmodal__bar">
+          {/* Traffic lights, same contract as DemoModal / the page title bar:
+              red is a real close button; yellow/green stay decorative. */}
+          <div class="bookmodal__dots">
+            <button
+              ref={closeRef}
+              type="button"
+              class="bookmodal__dot bookmodal__dot--red"
+              onClick={close}
+              aria-label={labels.close}
+              title={labels.close}
+            />
+            <span class="bookmodal__dot bookmodal__dot--yellow" aria-hidden="true" />
+            <span class="bookmodal__dot bookmodal__dot--green" aria-hidden="true" />
+          </div>
           <span class="bookmodal__title">{labels.title}</span>
-          <button ref={closeRef} class="bookmodal__close" onClick={close} aria-label={labels.close}>
-            ✕
-          </button>
         </header>
         <BookingFlow labels={labels} />
       </div>
@@ -83,19 +95,24 @@ export default function BookingModal({ labels }: { labels: BookingLabels }) {
 }
 
 // Slots arrive as UTC instants; all grouping/formatting below uses the
-// visitor's own timezone (no timeZone option = browser default), so a Lisbon
+// visitor's own timezone (local Date methods = browser default), so a Lisbon
 // 19:00 slot correctly shows as 15:00 — or even tomorrow — elsewhere.
-const dayFmt = new Intl.DateTimeFormat(undefined, {
-  weekday: 'short',
-  day: '2-digit',
-  month: 'short',
-});
 const timeFmt = new Intl.DateTimeFormat(undefined, { hour: '2-digit', minute: '2-digit' });
+const monthFmt = new Intl.DateTimeFormat(undefined, { month: 'long', year: 'numeric' });
+
+// Grouping key = the slot's LOCAL calendar date as "YYYY-MM-DD" — real date
+// parts (not a display string) so the calendar grid can do month math on it.
+function localDayKey(iso: string): string {
+  const d = new Date(iso);
+  const mm = String(d.getMonth() + 1).padStart(2, '0');
+  const dd = String(d.getDate()).padStart(2, '0');
+  return `${d.getFullYear()}-${mm}-${dd}`;
+}
 
 function groupByLocalDay(slots: Slot[]): Map<string, Slot[]> {
   const days = new Map<string, Slot[]>();
   for (const s of slots) {
-    const day = dayFmt.format(new Date(s.start));
+    const day = localDayKey(s.start);
     const list = days.get(day) ?? [];
     list.push(s);
     days.set(day, list);
@@ -103,11 +120,21 @@ function groupByLocalDay(slots: Slot[]): Map<string, Slot[]> {
   return days; // Map keeps insertion order = chronological (API sorts)
 }
 
+// Week starts Monday (European convention). 2024-01-01 was a Monday, so
+// formatting Jan 1–7 2024 yields localized Mon…Sun labels for the header.
+const weekdayLabels = Array.from({ length: 7 }, (_, i) =>
+  new Intl.DateTimeFormat(undefined, { weekday: 'short' })
+    .format(new Date(2024, 0, i + 1))
+    .slice(0, 2),
+);
+
 function BookingFlow({ labels }: { labels: BookingLabels }) {
   const [slots, setSlots] = useState<Slot[] | null>(null); // null = loading
   const [failed, setFailed] = useState(false);
   const [day, setDay] = useState<string | null>(null);
   const [slot, setSlot] = useState<Slot | null>(null);
+  const [viewYm, setViewYm] = useState<string | null>(null); // calendar month "YYYY-MM"
+  const [step, setStep] = useState<'pick' | 'details'>('pick'); // 2-step wizard
 
   useEffect(() => {
     fetch('/api/slots')
@@ -123,35 +150,124 @@ function BookingFlow({ labels }: { labels: BookingLabels }) {
   const days = groupByLocalDay(slots);
   const activeDay = day ?? days.keys().next().value!;
 
+  // Step 1: calendar + hours, and a continue button once a time is picked.
+  // Step 2: the picker clears away; the choice lives on in a small header
+  // (with a way back) above the name/email fields. `key` remounts the step
+  // container on change, replaying the shared enter animation.
   return (
-    <div class="bookmodal__body bookmodal__enter">
-      <p class="bookmodal__tz">{labels.tzNote}</p>
-      <div class="bookmodal__days" role="tablist">
-        {[...days.keys()].map((d) => (
-          <button
-            role="tab"
-            aria-selected={d === activeDay}
-            class={`bookmodal__day${d === activeDay ? ' is-active' : ''}`}
-            onClick={() => {
+    <div class="bookmodal__body">
+      {step === 'pick' ? (
+        <div class="bookmodal__step bookmodal__enter" key="pick">
+          <p class="bookmodal__tz">{labels.tzNote}</p>
+          <CalendarGrid
+            days={days}
+            activeDay={activeDay}
+            shownYm={viewYm ?? activeDay.slice(0, 7)}
+            onNav={setViewYm}
+            onPick={(d) => {
               setDay(d);
               setSlot(null); // switching day drops the picked time
             }}
-          >
-            {d}
-          </button>
-        ))}
+          />
+          <div class="bookmodal__times">
+            {days.get(activeDay)!.map((s) => (
+              <button
+                class={`bookmodal__time${slot?.start === s.start ? ' is-active' : ''}`}
+                onClick={() => setSlot(s)}
+              >
+                {timeFmt.format(new Date(s.start))}
+              </button>
+            ))}
+          </div>
+          {slot && (
+            <button
+              class="bookmodal__next bookmodal__enter"
+              onClick={() => setStep('details')}
+            >
+              {labels.next}
+            </button>
+          )}
+        </div>
+      ) : (
+        <div class="bookmodal__step bookmodal__enter" key="details">
+          <BookingForm labels={labels} slot={slot!} onBack={() => setStep('pick')} />
+        </div>
+      )}
+    </div>
+  );
+}
+
+// Month grid in the spirit of unix `cal`: weekday header row, plain day
+// numbers, week starts Monday. Days with free slots are live buttons; the
+// rest are dimmed. ‹ › only reach months the 14-day horizon touches.
+function CalendarGrid({
+  days,
+  activeDay,
+  shownYm,
+  onPick,
+  onNav,
+}: {
+  days: Map<string, Slot[]>;
+  activeDay: string;
+  shownYm: string; // "YYYY-MM" currently displayed
+  onPick: (day: string) => void;
+  onNav: (ym: string) => void;
+}) {
+  const [y, m] = shownYm.split('-').map(Number);
+  // Months that contain at least one bookable day (1 or 2 with a 14-day horizon).
+  const months = [...new Set([...days.keys()].map((k) => k.slice(0, 7)))];
+  const at = months.indexOf(shownYm);
+
+  const firstWeekday = (new Date(y, m - 1, 1).getDay() + 6) % 7; // Mon = 0
+  const daysInMonth = new Date(y, m, 0).getDate(); // day 0 of next month
+  const cells = [
+    ...Array.from({ length: firstWeekday }, () => null), // leading blanks
+    ...Array.from({ length: daysInMonth }, (_, i) => i + 1),
+  ];
+
+  return (
+    <div class="bookmodal__cal">
+      <div class="bookmodal__cal-head">
+        <button
+          class="bookmodal__cal-nav"
+          disabled={at <= 0}
+          onClick={() => onNav(months[at - 1])}
+          aria-label="previous month"
+        >
+          ‹
+        </button>
+        <span class="bookmodal__cal-month">{monthFmt.format(new Date(y, m - 1, 1))}</span>
+        <button
+          class="bookmodal__cal-nav"
+          disabled={at >= months.length - 1}
+          onClick={() => onNav(months[at + 1])}
+          aria-label="next month"
+        >
+          ›
+        </button>
       </div>
-      <div class="bookmodal__times">
-        {days.get(activeDay)!.map((s) => (
-          <button
-            class={`bookmodal__time${slot?.start === s.start ? ' is-active' : ''}`}
-            onClick={() => setSlot(s)}
-          >
-            {timeFmt.format(new Date(s.start))}
-          </button>
+      <div class="bookmodal__cal-grid">
+        {weekdayLabels.map((w) => (
+          <span class="bookmodal__cal-wd" aria-hidden="true">
+            {w}
+          </span>
         ))}
+        {cells.map((n) => {
+          if (n === null) return <span />;
+          const key = `${shownYm}-${String(n).padStart(2, '0')}`;
+          const open = days.has(key);
+          return (
+            <button
+              class={`bookmodal__cal-day${key === activeDay ? ' is-active' : ''}`}
+              disabled={!open}
+              aria-pressed={key === activeDay}
+              onClick={() => onPick(key)}
+            >
+              {n}
+            </button>
+          );
+        })}
       </div>
-      {slot && <BookingForm labels={labels} slot={slot} />}
     </div>
   );
 }
@@ -164,7 +280,15 @@ const dateTimeFmt = new Intl.DateTimeFormat(undefined, {
   minute: '2-digit',
 });
 
-function BookingForm({ labels, slot }: { labels: BookingLabels; slot: Slot }) {
+function BookingForm({
+  labels,
+  slot,
+  onBack,
+}: {
+  labels: BookingLabels;
+  slot: Slot;
+  onBack: () => void;
+}) {
   const [phase, setPhase] = useState<'form' | 'submitting' | 'done' | 'error'>('form');
   const [meetLink, setMeetLink] = useState('');
 
@@ -210,8 +334,13 @@ function BookingForm({ labels, slot }: { labels: BookingLabels; slot: Slot }) {
   }
 
   return (
-    <form class="bookmodal__form bookmodal__enter" onSubmit={onSubmit}>
-      <p class="bookmodal__picked">→ {dateTimeFmt.format(new Date(slot.start))}</p>
+    <form class="bookmodal__form" onSubmit={onSubmit}>
+      <div class="bookmodal__stephead">
+        <button type="button" class="bookmodal__back" onClick={onBack}>
+          {labels.back}
+        </button>
+        <p class="bookmodal__picked">→ {dateTimeFmt.format(new Date(slot.start))}</p>
+      </div>
       {phase === 'error' && <p class="bookmodal__error bookmodal__enter">{labels.error}</p>}
       <label>
         {labels.name}
