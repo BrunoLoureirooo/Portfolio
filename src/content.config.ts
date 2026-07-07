@@ -56,9 +56,11 @@ const samples = defineCollection({
     video: z.string().optional(),             // optional <1-min walkthrough
     // Live demo you host + control (so it can be framed in the modal). The
     // card becomes clickable when this is set; absent = no live link.
-    demoUrl: z.string().url().optional(),
+    // .url() alone accepts any scheme ("hhttps://…" passed once) — the
+    // startsWith makes scheme typos fail the build instead of the iframe.
+    demoUrl: z.string().url().startsWith('https://').optional(),
     // Optional source repo ("view source" link on the card).
-    repo: z.string().url().optional(),
+    repo: z.string().url().startsWith('https://').optional(),
     // Demo facts, NOT business results (e.g. label "to book" / value "60s").
     facts: z
       .array(z.object({ label: localized, value: z.string() }))

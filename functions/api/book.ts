@@ -12,6 +12,7 @@ interface Env {
   GOOGLE_CLIENT_ID?: string;
   GOOGLE_CLIENT_SECRET?: string;
   GOOGLE_REFRESH_TOKEN?: string;
+  OWNER_NOTIFY_EMAIL?: string; // real inbox (Proton) — invited to every event
   BOOKING_DEV?: string; // '1' → fake Meet link, skip Google (local testing)
 }
 
@@ -77,7 +78,7 @@ export const onRequestPost = async (context: Ctx): Promise<Response> => {
             clientSecret: GOOGLE_CLIENT_SECRET!,
             refreshToken: GOOGLE_REFRESH_TOKEN!,
           },
-          { start, end, name, email },
+          { start, end, name, email, ownerEmail: context.env.OWNER_NOTIFY_EMAIL },
         );
   } catch (err) {
     await BOOKINGS?.delete(key); // free the slot again — no event was created

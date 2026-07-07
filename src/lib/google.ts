@@ -31,6 +31,10 @@ export interface MeetBooking {
   end: string;
   name: string; // visitor's name → event title
   email: string; // visitor → attendee, gets the invite email
+  // Bruno's real inbox (Proton). The calendar lives on a dedicated Google
+  // account whose Gmail nobody reads — adding the real address as an attendee
+  // makes Google deliver the invite there directly, no mail forwarding.
+  ownerEmail?: string;
 }
 
 // Creates the event on Bruno's primary calendar and returns the Meet URL.
@@ -51,7 +55,9 @@ export async function createMeetEvent(creds: GoogleCreds, b: MeetBooking): Promi
       description: `Booked via brunoloureiro.dev by ${b.name} <${b.email}>.`,
       start: { dateTime: b.start },
       end: { dateTime: b.end },
-      attendees: [{ email: b.email }],
+      attendees: b.ownerEmail
+        ? [{ email: b.email }, { email: b.ownerEmail }]
+        : [{ email: b.email }],
       conferenceData: {
         createRequest: {
           requestId: crypto.randomUUID(), // idempotency key Google requires

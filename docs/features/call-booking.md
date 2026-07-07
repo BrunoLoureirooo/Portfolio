@@ -37,27 +37,20 @@ src/lib/booking.ts — shared slot math (windows, Lisbon-TZ→UTC, validation)
 | Name | Where | Purpose |
 | --- | --- | --- |
 | `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` | `.dev.vars` + Pages secrets | OAuth app credentials |
-| `GOOGLE_REFRESH_TOKEN` | `.dev.vars` + Pages secrets | Long-lived token for Bruno's Gmail (mint with `scripts/google-oauth.mjs`) |
+| `GOOGLE_REFRESH_TOKEN` | `.dev.vars` + Pages secrets | Long-lived token for the dedicated booking Google account (mint with `scripts/google-oauth.mjs`) |
+| `OWNER_NOTIFY_EMAIL` | `.dev.vars` + Pages secrets | Bruno's real inbox (Proton) — added as attendee so every invite lands there |
 | `BOOKING_DEV` | `.dev.vars` only | `1` → skip Google, return fake Meet link (local testing without creds) |
 | `BOOKINGS` (KV) | `--kv BOOKINGS` locally; KV namespace bound in Pages dashboard | taken-slot store |
 
-## One-time Google setup
+## One-time setup
 
-1. console.cloud.google.com → new project → enable **Google Calendar API**.
-2. OAuth consent screen: External. **Publish to production** (stays "unverified"
-   — fine, only Bruno consents). Testing mode would expire the refresh token
-   every 7 days.
-3. Credentials → OAuth client ID → Web application → redirect URI
-   `http://localhost:8787/callback`.
-4. `node scripts/google-oauth.mjs` → consent in browser with the Gmail →
-   prints `GOOGLE_REFRESH_TOKEN`.
-5. Cloudflare dashboard: create KV namespace `BOOKINGS`, bind to the Pages
-   project; add the three secrets.
+Full click-by-click tutorial (dedicated Google account, Proton notification
+routing, Cloudflare bindings): **[call-booking-setup.md](call-booking-setup.md)**.
 
 ## Risks / Phase 2
 
 - KV race (above). Fix if ever needed: Durable Object slot lock.
-- Owner gets the event on his calendar but Google doesn't email organizers —
-  rely on calendar notifications, or add Phase-2 email.
+- Organizer (dedicated account) isn't emailed by Google — solved by inviting
+  `OWNER_NOTIFY_EMAIL` (Proton) as an attendee on every event.
 - Modal strings come via props from `ui.ts` (island stays i18n-dumb like DemoModal).
 - Phase 2: Turnstile, cancellation links, reminder emails.

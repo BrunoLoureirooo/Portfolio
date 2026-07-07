@@ -6,9 +6,9 @@ subtitle:
   en: Online booking + deposits for a tattoo studio
   pt: Marcações online + depósitos para um estúdio de tatuagem
 # badge omitted → defaults to "concept demo" / "demo conceito" (honesty rule).
-# TODO: replace with your real hosted demo + repo. demoUrl site must allow
-# framing (set frame-ancestors in its _headers). example.com just proves wiring.
-demoUrl: hhttps://outcasttattoo.lpdigital.workers.dev
+# Live concept demo (Cloudflare Worker). Must stay framable — don't add
+# X-Frame-Options / frame-ancestors headers that exclude this site's origin.
+demoUrl: https://outcasttattoo.lpdigital.workers.dev
 repo: https://github.com/BrunoLoureirooo/outcasttattoo
 summary:
   en: A working demo of the booking flow — pick a slot, pay a deposit, get a reminder. This is what I'd build for your studio, not a delivered result.

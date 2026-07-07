@@ -1,7 +1,7 @@
 var __defProp = Object.defineProperty;
 var __name = (target, value) => __defProp(target, "name", { value, configurable: true });
 
-// .wrangler/tmp/pages-QwfcFO/functionsWorker-0.9680243564783311.mjs
+// .wrangler/tmp/pages-UeAkO1/functionsWorker-0.28446894648623555.mjs
 var __defProp2 = Object.defineProperty;
 var __name2 = /* @__PURE__ */ __name((target, value) => __defProp2(target, "name", { value, configurable: true }), "__name");
 function readEnv(key) {
@@ -430,7 +430,7 @@ async function createMeetEvent(creds, b) {
       description: `Booked via brunoloureiro.dev by ${b.name} <${b.email}>.`,
       start: { dateTime: b.start },
       end: { dateTime: b.end },
-      attendees: [{ email: b.email }],
+      attendees: b.ownerEmail ? [{ email: b.email }, { email: b.ownerEmail }] : [{ email: b.email }],
       conferenceData: {
         createRequest: {
           requestId: crypto.randomUUID(),
@@ -497,7 +497,7 @@ var onRequestPost = /* @__PURE__ */ __name2(async (context) => {
         clientSecret: GOOGLE_CLIENT_SECRET,
         refreshToken: GOOGLE_REFRESH_TOKEN
       },
-      { start, end, name, email }
+      { start, end, name, email, ownerEmail: context.env.OWNER_NOTIFY_EMAIL }
     );
   } catch (err) {
     await BOOKINGS?.delete(key);
@@ -1196,7 +1196,7 @@ var jsonError2 = /* @__PURE__ */ __name(async (request, env, _ctx, middlewareCtx
 }, "jsonError");
 var middleware_miniflare3_json_error_default2 = jsonError2;
 
-// .wrangler/tmp/bundle-3eBiGl/middleware-insertion-facade.js
+// .wrangler/tmp/bundle-ciBCc6/middleware-insertion-facade.js
 var __INTERNAL_WRANGLER_MIDDLEWARE__2 = [
   middleware_ensure_req_body_drained_default2,
   middleware_miniflare3_json_error_default2
@@ -1228,7 +1228,7 @@ function __facade_invoke__2(request, env, ctx, dispatch, finalMiddleware) {
 }
 __name(__facade_invoke__2, "__facade_invoke__");
 
-// .wrangler/tmp/bundle-3eBiGl/middleware-loader.entry.ts
+// .wrangler/tmp/bundle-ciBCc6/middleware-loader.entry.ts
 var __Facade_ScheduledController__2 = class ___Facade_ScheduledController__2 {
   constructor(scheduledTime, cron, noRetry) {
     this.scheduledTime = scheduledTime;
@@ -1330,4 +1330,4 @@ export {
   __INTERNAL_WRANGLER_MIDDLEWARE__2 as __INTERNAL_WRANGLER_MIDDLEWARE__,
   middleware_loader_entry_default2 as default
 };
-//# sourceMappingURL=functionsWorker-0.9680243564783311.js.map
+//# sourceMappingURL=functionsWorker-0.28446894648623555.js.map

@@ -420,7 +420,7 @@ async function createMeetEvent(creds, b) {
       description: `Booked via brunoloureiro.dev by ${b.name} <${b.email}>.`,
       start: { dateTime: b.start },
       end: { dateTime: b.end },
-      attendees: [{ email: b.email }],
+      attendees: b.ownerEmail ? [{ email: b.email }, { email: b.ownerEmail }] : [{ email: b.email }],
       conferenceData: {
         createRequest: {
           requestId: crypto.randomUUID(),
@@ -490,7 +490,7 @@ var onRequestPost = /* @__PURE__ */ __name(async (context) => {
         clientSecret: GOOGLE_CLIENT_SECRET,
         refreshToken: GOOGLE_REFRESH_TOKEN
       },
-      { start, end, name, email }
+      { start, end, name, email, ownerEmail: context.env.OWNER_NOTIFY_EMAIL }
     );
   } catch (err) {
     await BOOKINGS?.delete(key);
@@ -500,7 +500,7 @@ var onRequestPost = /* @__PURE__ */ __name(async (context) => {
   return json(200, { ok: true, meetLink, start, end });
 }, "onRequestPost");
 
-// ../.wrangler/tmp/pages-QwfcFO/functionsRoutes-0.10962068180746021.mjs
+// ../.wrangler/tmp/pages-AifPBD/functionsRoutes-0.6597025954551486.mjs
 var routes = [
   {
     routePath: "/api/activity",
@@ -1012,7 +1012,7 @@ var jsonError = /* @__PURE__ */ __name(async (request, env, _ctx, middlewareCtx)
 }, "jsonError");
 var middleware_miniflare3_json_error_default = jsonError;
 
-// ../.wrangler/tmp/bundle-VjSYsl/middleware-insertion-facade.js
+// ../.wrangler/tmp/bundle-bcQkxR/middleware-insertion-facade.js
 var __INTERNAL_WRANGLER_MIDDLEWARE__ = [
   middleware_ensure_req_body_drained_default,
   middleware_miniflare3_json_error_default
@@ -1044,7 +1044,7 @@ function __facade_invoke__(request, env, ctx, dispatch, finalMiddleware) {
 }
 __name(__facade_invoke__, "__facade_invoke__");
 
-// ../.wrangler/tmp/bundle-VjSYsl/middleware-loader.entry.ts
+// ../.wrangler/tmp/bundle-bcQkxR/middleware-loader.entry.ts
 var __Facade_ScheduledController__ = class ___Facade_ScheduledController__ {
   constructor(scheduledTime, cron, noRetry) {
     this.scheduledTime = scheduledTime;
@@ -1146,4 +1146,4 @@ export {
   __INTERNAL_WRANGLER_MIDDLEWARE__,
   middleware_loader_entry_default as default
 };
-//# sourceMappingURL=functionsWorker-0.9680243564783311.mjs.map
+//# sourceMappingURL=functionsWorker-0.212977953584797.mjs.map
