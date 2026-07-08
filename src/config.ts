@@ -17,3 +17,12 @@ export const startView: StartView = 'ask';
 // scheduling link (Cal.com / Calendly) to send "book a call" straight there;
 // null falls back to a pre-filled email so the CTA is never a dead anchor.
 export const bookingUrl: string | null = null;
+
+// Self-hosted booking modal (docs/features/call-booking.md) — code is done
+// and tested, but it's STUBBED OFF: the Google account it needs (dedicated
+// calendar owner, see docs/features/call-booking-setup.md) isn't finished —
+// blocked on phone-verification + storage-quota issues on that account.
+// false → CTA is a plain mailto with a visible "coming soon" note, so
+// visitors never see a booking flow backed by an unconfigured API.
+// Flip to true once GOOGLE_* secrets are live in Cloudflare Pages.
+export const bookingEnabled = false;

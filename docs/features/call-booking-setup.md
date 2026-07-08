@@ -46,25 +46,36 @@ calendar", not your personal mail/calendar.
 2. Make sure the new project is selected in the top bar.
 3. **APIs & Services → Library** → search "Google Calendar API" → **Enable**.
 
-No billing account is needed — the Calendar API is free at this scale.
+No billing account is needed — the Calendar API is free at this scale. If the
+Cloud project **Overview** page shows a "Google Auth Platform" check-up card
+warning about a missing billing account, ignore it — that's a generic Cloud
+nudge, unrelated to OAuth or Calendar working.
 
-## Step 3 — OAuth consent screen (publish it!)
+## Step 3 — OAuth consent (publish it!)
 
-1. **APIs & Services → OAuth consent screen** (newer consoles call this
-   **Google Auth Platform → Branding/Audience** — same settings).
-2. User type: **External** → Create.
-3. App name `portfolio-booking`, support email = the new Gmail, developer
-   contact = the new Gmail. Save through the steps — you can skip adding
-   scopes and test users.
-4. **Publish the app to Production** (Audience page → "Publish app").
+Google renamed "OAuth consent screen" to **Google Auth Platform**, split
+across a few left-sidebar pages: Overview, Branding, Audience, Clients, Data
+access, Verification Center, Settings. (Portuguese console: Visão geral,
+Branding, Público-alvo, Clientes, Acesso a dados, Central de verificação,
+Configurações.) This step uses **Audience**; Step 4 uses **Clients**.
+
+1. Left sidebar → **Audience** (Público-alvo).
+2. If this is the project's first visit here, it'll prompt you to configure
+   the app first: User type **External** → Create. App name
+   `portfolio-booking`, support email = the new Gmail, developer contact =
+   the new Gmail. Save through the steps — skip adding scopes/test users.
+3. Back on **Audience**: find **Publish app** and click it to move the app
+   from Testing to **Production**.
    - It will say the app is *unverified*. That's fine — you are the only
      person who will ever consent to it.
-   - **Do not leave it in Testing mode**: testing-mode refresh tokens expire
-     after 7 days and your booking would silently die a week after launch.
+   - **Do not leave it in Testing**: testing-mode refresh tokens expire after
+     7 days and your booking would silently die a week after launch.
 
 ## Step 4 — OAuth client
 
-1. **APIs & Services → Credentials → + Create credentials → OAuth client ID**.
+1. Left sidebar → **Clients** (Clientes) → **+ Create client** (or
+   **+ Create credentials → OAuth client ID** if you're on the older
+   Credentials page).
 2. Application type: **Web application**, name `portfolio-booking-local`.
 3. Authorized redirect URIs → **Add URI** → exactly:
    `http://localhost:8787/callback`

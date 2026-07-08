@@ -1,5 +1,12 @@
 # Call booking (self-hosted)
 
+> **Status: built + tested, stubbed off in production.** `bookingEnabled =
+> false` in `src/config.ts` — flip it once the dedicated Google account
+> (`docs/features/call-booking-setup.md`) is unblocked (currently stuck on
+> that account's phone verification + full storage quota). While off, the CTA
+> is a plain mailto and the contact panel shows a visible "in progress" note
+> — no modal is mounted, so nothing calls the unconfigured API.
+
 Book-a-call CTA opens an in-page terminal-window modal (no Calendly/Cal.com).
 Visitor picks a 30-min slot → a Cloudflare Pages Function creates a Google
 Calendar event with a **unique Google Meet link** → Google emails the invite to
