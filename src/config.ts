@@ -19,10 +19,11 @@ export const startView: StartView = 'ask';
 export const bookingUrl: string | null = null;
 
 // Self-hosted booking modal (docs/features/call-booking.md) — code is done
-// and tested, but it's STUBBED OFF: the Google account it needs (dedicated
-// calendar owner, see docs/features/call-booking-setup.md) isn't finished —
-// blocked on phone-verification + storage-quota issues on that account.
-// false → CTA is a plain mailto with a visible "coming soon" note, so
-// visitors never see a booking flow backed by an unconfigured API.
+// and tested, but going live is blocked on phone-verification + storage-quota
+// issues on the dedicated Google account (docs/features/call-booking-setup.md).
+// The modal itself ALWAYS opens and is fully browsable (calendar, time
+// slots, the continue step) regardless of this flag — only the final action
+// is gated: false stubs the last step (a clear "not live yet" note + mailto,
+// no API call); true lets it actually submit to Google.
 // Flip to true once GOOGLE_* secrets are live in Cloudflare Pages.
-export const bookingEnabled = false;
+export const bookingLive = false;

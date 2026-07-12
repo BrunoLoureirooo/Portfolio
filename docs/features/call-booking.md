@@ -1,11 +1,13 @@
 # Call booking (self-hosted)
 
-> **Status: built + tested, stubbed off in production.** `bookingEnabled =
+> **Status: built + tested, final step stubbed in production.** `bookingLive =
 > false` in `src/config.ts` — flip it once the dedicated Google account
 > (`docs/features/call-booking-setup.md`) is unblocked (currently stuck on
 > that account's phone verification + full storage quota). While off, the CTA
-> is a plain mailto and the contact panel shows a visible "in progress" note
-> — no modal is mounted, so nothing calls the unconfigured API.
+> opens the real modal — calendar, hours, the continue step all work — but
+> the final step stops short of calling `/api/book`: it shows a "still being
+> wired up" note with a mailto fallback pre-filled with the chosen slot,
+> instead of hitting an API that would either fake-succeed or 503.
 
 Book-a-call CTA opens an in-page terminal-window modal (no Calendly/Cal.com).
 Visitor picks a 30-min slot → a Cloudflare Pages Function creates a Google

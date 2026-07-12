@@ -7,19 +7,19 @@
 import Section from '../Section.astro';
 import BookingModal from './BookingModal';
 import { getCvContent } from '../../lib/cvContent';
-import { bookingUrl, bookingEnabled } from '../../config';
+import { bookingUrl, bookingLive } from '../../config';
 import { useTranslations } from '../../i18n/utils';
 
 const t = useTranslations(Astro.currentLocale);
 const { contact } = await getCvContent(Astro.currentLocale);
 
-// Self-hosted booking modal (docs/features/call-booking.md) is built and
-// tested but STUBBED OFF (bookingEnabled = false in config — see comment
-// there) until the Google account behind it is finished. While off, the CTA
-// is a plain mailto and a visible note says so — no modal is mounted, so
-// there's no risk of a visitor hitting the unconfigured API. An external
-// bookingUrl (if ever set) always bypasses the modal, enabled or not.
-const showModal = bookingEnabled && !bookingUrl;
+// Self-hosted booking modal (docs/features/call-booking.md) always opens —
+// visitors can browse the calendar and pick a time regardless of bookingLive.
+// Only the final step is gated (see BookingModal's `live` prop): while going
+// live is blocked (config.ts comment), the last step stubs out instead of
+// calling the API. An external bookingUrl (if ever set) bypasses the modal
+// entirely — that's a real scheduling link, no stubbing needed.
+const showModal = !bookingUrl;
 const bookHref =
   bookingUrl ??
   `mailto:${contact.email}?subject=${encodeURIComponent('20-min call')}`;
@@ -40,6 +40,8 @@ const bookingLabels = {
   error: t('c.book.error'),
   back: t('c.book.back'),
   close: t('c.book.close'),
+  stubNote: t('c.book.stubNote'),
+  stubCta: t('c.book.stubCta'),
 };
 ---
 
@@ -59,11 +61,12 @@ const bookingLabels = {
       >{t('c.cta.book')}</a>
       <a class="c-cta c-cta--ghost" href={`mailto:${contact.email}`}>{t('c.cta.email')}</a>
     </div>
-    {!showModal && <p class="contact-panel__stub">{t('c.book.stub')}</p>}
   </div>
 </Section>
 
-{showModal && <BookingModal client:idle labels={bookingLabels} />}
+{showModal && (
+  <BookingModal client:idle labels={bookingLabels} live={bookingLive} contactEmail={contact.email} />
+)}
 
 <style>
   .contact-panel {
@@ -83,12 +86,5 @@ const bookingLabels = {
     display: flex;
     flex-wrap: wrap;
     gap: var(--space-3);
-  }
-  /* Same treatment as the work-section "# concept demo" note — a terminal
-     comment, not an apology. Only renders while bookingEnabled = false. */
-  .contact-panel__stub {
-    color: var(--dim);
-    font-size: var(--text-sm);
-    margin-top: var(--space-3);
   }
 </style>

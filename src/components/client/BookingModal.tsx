@@ -21,6 +21,8 @@ export interface BookingLabels {
   error: string;
   back: string;
   close: string;
+  stubNote: string; // shown at the final step while `live` is false
+  stubCta: string; // mailto button label in that same stub state
 }
 
 interface Slot {
@@ -28,7 +30,16 @@ interface Slot {
   end: string;
 }
 
-export default function BookingModal({ labels }: { labels: BookingLabels }) {
+interface BookingModalProps {
+  labels: BookingLabels;
+  // false → the flow is fully browsable (calendar, times, continue) but the
+  // last step stubs out instead of calling the API — see config.ts
+  // `bookingLive` for why. true → the form actually submits to Google.
+  live: boolean;
+  contactEmail: string; // mailto fallback target for the stub state
+}
+
+export default function BookingModal({ labels, live, contactEmail }: BookingModalProps) {
   const [open, setOpen] = useState(false);
   const closeRef = useRef<HTMLButtonElement>(null);
   const triggerRef = useRef<HTMLElement | null>(null);
@@ -88,7 +99,7 @@ export default function BookingModal({ labels }: { labels: BookingLabels }) {
           </div>
           <span class="bookmodal__title">{labels.title}</span>
         </header>
-        <BookingFlow labels={labels} />
+        <BookingFlow labels={labels} live={live} contactEmail={contactEmail} />
       </div>
     </div>
   );
@@ -128,7 +139,15 @@ const weekdayLabels = Array.from({ length: 7 }, (_, i) =>
     .slice(0, 2),
 );
 
-function BookingFlow({ labels }: { labels: BookingLabels }) {
+function BookingFlow({
+  labels,
+  live,
+  contactEmail,
+}: {
+  labels: BookingLabels;
+  live: boolean;
+  contactEmail: string;
+}) {
   const [slots, setSlots] = useState<Slot[] | null>(null); // null = loading
   const [failed, setFailed] = useState(false);
   const [day, setDay] = useState<string | null>(null);
@@ -190,7 +209,13 @@ function BookingFlow({ labels }: { labels: BookingLabels }) {
         </div>
       ) : (
         <div class="bookmodal__step bookmodal__enter" key="details">
-          <BookingForm labels={labels} slot={slot!} onBack={() => setStep('pick')} />
+          <BookingForm
+            labels={labels}
+            slot={slot!}
+            onBack={() => setStep('pick')}
+            live={live}
+            contactEmail={contactEmail}
+          />
         </div>
       )}
     </div>
@@ -284,13 +309,44 @@ function BookingForm({
   labels,
   slot,
   onBack,
+  live,
+  contactEmail,
 }: {
   labels: BookingLabels;
   slot: Slot;
   onBack: () => void;
+  live: boolean;
+  contactEmail: string;
 }) {
   const [phase, setPhase] = useState<'form' | 'submitting' | 'done' | 'error'>('form');
   const [meetLink, setMeetLink] = useState('');
+
+  const stephead = (
+    <div class="bookmodal__stephead">
+      <button type="button" class="bookmodal__back" onClick={onBack}>
+        {labels.back}
+      </button>
+      <p class="bookmodal__picked">→ {dateTimeFmt.format(new Date(slot.start))}</p>
+    </div>
+  );
+
+  // Going live is blocked on the dedicated Google account (config.ts
+  // `bookingLive`) — the picker stays fully real, but the commit step stops
+  // here instead of hitting an API that would either fake-succeed or 503.
+  if (!live) {
+    const mailtoHref = `mailto:${contactEmail}?subject=${encodeURIComponent(
+      `Call request — ${dateTimeFmt.format(new Date(slot.start))}`,
+    )}`;
+    return (
+      <div class="bookmodal__stub">
+        {stephead}
+        <p class="bookmodal__stub-note">{labels.stubNote}</p>
+        <a class="bookmodal__next" href={mailtoHref}>
+          {labels.stubCta}
+        </a>
+      </div>
+    );
+  }
 
   async function onSubmit(e: Event) {
     e.preventDefault();
@@ -335,12 +391,7 @@ function BookingForm({
 
   return (
     <form class="bookmodal__form" onSubmit={onSubmit}>
-      <div class="bookmodal__stephead">
-        <button type="button" class="bookmodal__back" onClick={onBack}>
-          {labels.back}
-        </button>
-        <p class="bookmodal__picked">→ {dateTimeFmt.format(new Date(slot.start))}</p>
-      </div>
+      {stephead}
       {phase === 'error' && <p class="bookmodal__error bookmodal__enter">{labels.error}</p>}
       <label>
         {labels.name}

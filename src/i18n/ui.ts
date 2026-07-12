@@ -117,8 +117,10 @@ export const ui = {
     'c.book.error': 'that didn’t work — the slot may be taken. pick another or email me.',
     'c.book.back': '← back',
     'c.book.close': 'close booking',
-    // Shown instead of the modal while bookingEnabled = false (src/config.ts).
-    'c.book.stub': '# booking automation — in progress, email works now',
+    // Shown at the final step instead of the form while bookingLive = false
+    // (src/config.ts) — the picker itself stays fully real.
+    'c.book.stubNote': '# booking automation still being wired up — email me this slot and I’ll confirm it by hand.',
+    'c.book.stubCta': '$ email me this slot →',
 
     // Hero. Terminal-flavor lines (lastlogin/cmd) and the name stay constant;
     // neofetch labels + technical values are program output (kept as-is); only
@@ -285,7 +287,8 @@ export const ui = {
     'c.book.error': 'não resultou — o horário pode estar ocupado. escolhe outro ou manda email.',
     'c.book.back': '← voltar',
     'c.book.close': 'fechar marcação',
-    'c.book.stub': '# marcação automática — em progresso, o email funciona já',
+    'c.book.stubNote': '# marcação automática ainda em construção — envia-me este horário por email e confirmo-o manualmente.',
+    'c.book.stubCta': '$ enviar este horário por email →',
 
     'hero.lastlogin': 'Last login: Wed Jun 25 14:08:21 on ttys001',
     'hero.cmd': 'whoami',
